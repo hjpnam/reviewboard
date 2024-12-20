@@ -1,0 +1,6 @@
+2024.12.19 23:14:33 INFO  tracing is disabled for protocol LSP, to enable tracing of incoming and outgoing JSON messages create an empty file at /Users/hjpnam/zio-rite/.metals/lsp.trace.json or /Users/hjpnam/Library/Caches/org.scalameta.metals/lsp.trace.json[0m
+2024.12.19 23:14:34 INFO  logging to file /Users/hjpnam/zio-rite/.metals/metals.log[0m
+2024.12.19 23:14:34 INFO  Started: Metals version 0.11.2 in workspace '/Users/hjpnam/zio-rite' for client coc.nvim 0.0.82.[0m
+2024.12.19 23:14:34 INFO  Parse release: 1.8.0_292[0m
+2024.12.19 23:14:36 INFO  time: initialize in 2.37s[0m
+2024.12.19 23:14:37 WARN  Build server is not auto-connectable.[0m
