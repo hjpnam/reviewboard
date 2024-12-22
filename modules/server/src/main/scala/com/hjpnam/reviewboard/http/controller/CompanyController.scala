@@ -1,7 +1,7 @@
-package com.hjpnam.reviewboard.http.controllers
+package com.hjpnam.reviewboard.http.controller
 
 import com.hjpnam.reviewboard.domain.data.Company
-import com.hjpnam.reviewboard.http.endpoints.CompanyEndpoints
+import com.hjpnam.reviewboard.http.endpoint.CompanyEndpoints
 import sttp.tapir.ztapir.*
 import zio.*
 

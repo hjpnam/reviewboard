@@ -1,4 +1,4 @@
-package com.hjpnam.reviewboard.http.requests
+package com.hjpnam.reviewboard.http.request
 
 import com.hjpnam.reviewboard.domain.data.Company
 import zio.json.{DeriveJsonCodec, JsonCodec}

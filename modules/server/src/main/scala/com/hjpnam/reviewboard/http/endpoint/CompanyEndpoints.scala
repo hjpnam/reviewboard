@@ -1,7 +1,7 @@
-package com.hjpnam.reviewboard.http.endpoints
+package com.hjpnam.reviewboard.http.endpoint
 
 import com.hjpnam.reviewboard.domain.data.Company
-import com.hjpnam.reviewboard.http.requests.CreateCompanyRequest
+import com.hjpnam.reviewboard.http.request.CreateCompanyRequest
 import sttp.tapir.generic.auto.*
 import sttp.tapir.json.zio.jsonBody
 import sttp.tapir.ztapir.*

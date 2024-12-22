@@ -1,6 +1,6 @@
-package com.hjpnam.reviewboard.http.controllers
+package com.hjpnam.reviewboard.http.controller
 
-import com.hjpnam.reviewboard.http.endpoints.HealthEndpoint
+import com.hjpnam.reviewboard.http.endpoint.HealthEndpoint
 import sttp.tapir.ztapir.*
 import zio.{UIO, ZIO}
 

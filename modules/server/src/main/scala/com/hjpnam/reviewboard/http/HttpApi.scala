@@ -1,6 +1,6 @@
 package com.hjpnam.reviewboard.http
 
-import com.hjpnam.reviewboard.http.controllers.{BaseController, CompanyController, HealthController}
+import com.hjpnam.reviewboard.http.controller.{BaseController, CompanyController, HealthController}
 import sttp.tapir.ztapir.ZServerEndpoint
 import zio.UIO
 

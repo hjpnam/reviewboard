@@ -1,4 +1,4 @@
-package com.hjpnam.reviewboard.http.endpoints
+package com.hjpnam.reviewboard.http.endpoint
 
 import sttp.tapir.ztapir.*
 

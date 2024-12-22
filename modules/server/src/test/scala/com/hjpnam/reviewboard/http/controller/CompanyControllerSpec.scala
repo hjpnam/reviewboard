@@ -1,7 +1,7 @@
-package com.hjpnam.reviewboard.http.controllers
+package com.hjpnam.reviewboard.http.controller
 
 import com.hjpnam.reviewboard.domain.data.Company
-import com.hjpnam.reviewboard.http.requests.CreateCompanyRequest
+import com.hjpnam.reviewboard.http.request.CreateCompanyRequest
 import com.hjpnam.reviewboard.syntax.*
 import sttp.client3.*
 import sttp.client3.testing.SttpBackendStub
@@ -46,7 +46,7 @@ object CompanyControllerSpec extends ZIOSpecDefault:
       test("GET /companies without data") {
         val program = for
           backendStub <- backendStubZIO(_.getAll :: Nil)
-          response <- t
+          response <- basicRequest
             .get(uri"/companies")
             .send(backendStub)
         yield response.body
