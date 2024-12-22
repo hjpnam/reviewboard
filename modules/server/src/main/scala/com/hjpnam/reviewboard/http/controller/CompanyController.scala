@@ -2,34 +2,33 @@ package com.hjpnam.reviewboard.http.controller
 
 import com.hjpnam.reviewboard.domain.data.Company
 import com.hjpnam.reviewboard.http.endpoint.CompanyEndpoints
-import sttp.tapir.ztapir.*
+import com.hjpnam.reviewboard.service.CompanyService
+import sttp.tapir.*
+import sttp.tapir.server.ServerEndpoint
 import zio.*
 
 import scala.collection.mutable
 
-class CompanyController private extends BaseController with CompanyEndpoints:
-  val db = mutable.Map[Long, Company]()
+class CompanyController private (companyService: CompanyService)
+    extends BaseController
+    with CompanyEndpoints:
 
-  val create = createEndpoint.zServerLogic[Any] { req =>
-    ZIO.succeed {
-      val newId      = if db.keys.isEmpty then 1 else db.keys.max + 1
-      val newCompany = req.toCompany(newId)
-      db += newId -> newCompany
-      newCompany
-    }
-  }
+  val create = createEndpoint.serverLogicSuccess[Task](companyService.create)
 
-  val getAll = getAllEndpoint.zServerLogic[Any] { _ =>
-    ZIO.succeed(db.values.toList)
-  }
+  val getAll = getAllEndpoint.serverLogicSuccess[Task](_ => companyService.getAll)
 
-  val getById = getByIdEndpoint.zServerLogic[Any] { id =>
+  val getById = getByIdEndpoint.serverLogicSuccess[Task] { id =>
     ZIO
       .attempt(id.toLong)
-      .mapBoth(_ => None, db.get)
+      .flatMap(companyService.getById)
+      .catchSome { case _: NumberFormatException =>
+        companyService.getBySlug(id)
+      }
   }
 
-  override val routes: List[ZServerEndpoint[Any, Any]] = create :: getAll :: getById :: Nil
+  override val routes: List[ServerEndpoint[Any, Task]] = create :: getAll :: getById :: Nil
 
 object CompanyController:
-  val makeZIO: UIO[CompanyController] = ZIO.succeed(new CompanyController)
+  val makeZIO: URIO[CompanyService, CompanyController] =
+    for companyService <- ZIO.service[CompanyService]
+    yield new CompanyController(companyService)
