@@ -3,7 +3,8 @@ ThisBuild / version      := "0.1.0-SNAPSHOT"
 ThisBuild / scalacOptions ++= Seq(
   "-unchecked",
   "-deprecation",
-  "-feature"
+  "-feature",
+  "-Yretain-trees"
 )
 
 ThisBuild / testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework")
