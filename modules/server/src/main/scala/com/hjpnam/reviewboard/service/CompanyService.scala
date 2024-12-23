@@ -2,6 +2,7 @@ package com.hjpnam.reviewboard.service
 
 import com.hjpnam.reviewboard.domain.data.Company
 import com.hjpnam.reviewboard.http.request.CreateCompanyRequest
+import com.hjpnam.reviewboard.repository.CompanyRepository
 import zio.*
 
 import scala.collection.mutable
@@ -14,6 +15,23 @@ trait CompanyService:
 
 object CompanyService:
   val dummyLayer: ULayer[CompanyServiceDummy] = ZLayer.succeed(new CompanyServiceDummy)
+  val live: URLayer[CompanyRepository, CompanyServiceLive] = ZLayer {
+    for repository <- ZIO.service[CompanyRepository]
+    yield new CompanyServiceLive(repository)
+  }
+
+class CompanyServiceLive(companyRepository: CompanyRepository) extends CompanyService:
+  override def create(createRequest: CreateCompanyRequest): Task[Company] =
+    companyRepository.create(createRequest.toCompany(-1))
+
+  override def getAll: Task[List[Company]] =
+    companyRepository.get
+
+  override def getById(id: Long): Task[Option[Company]] =
+    companyRepository.getById(id)
+
+  override def getBySlug(slug: String): Task[Option[Company]] =
+    companyRepository.getBySlug(slug)
 
 class CompanyServiceDummy extends CompanyService:
   val db = mutable.Map.empty[Long, Company]
