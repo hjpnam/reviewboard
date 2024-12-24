@@ -1,7 +1,7 @@
 package com.hjpnam.reviewboard
 
 import com.hjpnam.reviewboard.http.HttpApi
-import com.hjpnam.reviewboard.repository.{CompanyRepository, CompanyRepositoryLive}
+import com.hjpnam.reviewboard.repository.{CompanyRepository, CompanyRepositoryLive, Repository}
 import com.hjpnam.reviewboard.service.CompanyService
 import io.getquill.SnakeCase
 import sttp.tapir.server.ziohttp.ZioHttpInterpreter
@@ -23,6 +23,5 @@ object Application extends ZIOAppDefault:
       Server.default,
       CompanyService.live,
       CompanyRepository.live,
-      Quill.Postgres.fromNamingStrategy(SnakeCase),
-      Quill.DataSource.fromPrefix("app.db")
+      Repository.dataLayer
     )

@@ -1,6 +1,3 @@
-CREATE DATABASE reviewboard;
-\c reviewboard;
-
 CREATE TABLE IF NOT EXISTS company (
     id BIGSERIAL PRIMARY KEY,
     slug TEXT UNIQUE NOT NULL,
