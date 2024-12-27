@@ -15,9 +15,8 @@ trait CompanyRepository:
 
 object CompanyRepository:
   val live: URLayer[Quill.Postgres[SnakeCase], CompanyRepositoryLive] = ZLayer {
-    for {
-      quill <- ZIO.service[Quill.Postgres[SnakeCase]]
-    } yield new CompanyRepositoryLive(quill)
+    for quill <- ZIO.service[Quill.Postgres[SnakeCase]]
+    yield new CompanyRepositoryLive(quill)
   }
 
 class CompanyRepositoryLive(quill: Quill.Postgres[SnakeCase]) extends CompanyRepository:

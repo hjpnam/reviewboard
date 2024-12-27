@@ -2,25 +2,26 @@ package com.hjpnam.reviewboard.repository
 
 import com.hjpnam.reviewboard.domain.data.Company
 import com.hjpnam.reviewboard.syntax.*
+import com.hjpnam.reviewboard.util.Gen
 import org.postgresql.ds.PGSimpleDataSource
 import zio.*
 import zio.test.*
 
 import java.sql.SQLException
 
-object CompanyRepositorySpec extends ZIOSpecDefault with RepositorySpec:
+object CompanyRepositorySpec extends ZIOSpecDefault with RepositorySpec with Gen:
   private val fooCompany = Company(1L, "foo", "foo", "foo.com")
-
-  private def genString(): String =
-    scala.util.Random.alphanumeric.take(8).mkString
 
   private def genCompany(): Company =
     Company(
       id = -1L,
-      slug = genString(),
-      name = genString(),
-      url = genString()
+      slug = genString(8),
+      name = genString(8),
+      url = genString(8)
     )
+
+  override val initScriptPath = "sql/companies.sql"
+
   override def spec: Spec[TestEnvironment & Scope, Any] =
     suite("CompanyRepositorySpec")(
       test("create a company") {

@@ -1,7 +1,7 @@
 package com.hjpnam.reviewboard.http.controller
 
 import com.hjpnam.reviewboard.domain.data.Company
-import com.hjpnam.reviewboard.http.endpoint.CompanyEndpoints
+import com.hjpnam.reviewboard.http.endpoint.CompanyEndpoint
 import com.hjpnam.reviewboard.service.CompanyService
 import sttp.tapir.*
 import sttp.tapir.server.ServerEndpoint
@@ -11,7 +11,7 @@ import scala.collection.mutable
 
 class CompanyController private (companyService: CompanyService)
     extends BaseController
-    with CompanyEndpoints:
+    with CompanyEndpoint:
 
   val create = createEndpoint.serverLogicSuccess[Task](companyService.create)
 

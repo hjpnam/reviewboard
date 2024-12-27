@@ -1,13 +1,17 @@
 package com.hjpnam.reviewboard
 
 import com.hjpnam.reviewboard.http.HttpApi
-import com.hjpnam.reviewboard.repository.{CompanyRepository, CompanyRepositoryLive, Repository}
-import com.hjpnam.reviewboard.service.CompanyService
+import com.hjpnam.reviewboard.repository.{
+  CompanyRepository,
+  CompanyRepositoryLive,
+  Repository,
+  ReviewRepository
+}
+import com.hjpnam.reviewboard.service.{CompanyService, ReviewService}
 import io.getquill.SnakeCase
 import sttp.tapir.server.ziohttp.ZioHttpInterpreter
 import zio.*
 import zio.http.Server
-import io.getquill.jdbczio.Quill
 
 object Application extends ZIOAppDefault:
 
@@ -23,5 +27,7 @@ object Application extends ZIOAppDefault:
       Server.default,
       CompanyService.live,
       CompanyRepository.live,
+      ReviewService.live,
+      ReviewRepository.live,
       Repository.dataLayer
     )

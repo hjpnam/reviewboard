@@ -11,10 +11,9 @@ final case class CreateCompanyRequest(
     industry: Option[String] = None,
     image: Option[String] = None,
     tags: List[String] = Nil
-) {
+):
   def toCompany(id: Long): Company =
     Company(id, Company.makeSlug(name), name, url, location, country, industry, image, tags)
-}
 
 object CreateCompanyRequest:
   given codec: JsonCodec[CreateCompanyRequest] = DeriveJsonCodec.gen[CreateCompanyRequest]

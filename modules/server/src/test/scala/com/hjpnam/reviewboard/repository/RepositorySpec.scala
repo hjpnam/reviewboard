@@ -5,9 +5,11 @@ import org.testcontainers.containers.PostgreSQLContainer
 import zio.{ZIO, ZLayer}
 
 trait RepositorySpec:
+  def initScriptPath: String
+
   def createPostgresContainer(): PostgreSQLContainer[Nothing] =
     val container: PostgreSQLContainer[Nothing] =
-      PostgreSQLContainer("postgres").withInitScript("sql/companies.sql")
+      PostgreSQLContainer("postgres").withInitScript(initScriptPath)
     container.start()
     container
 
