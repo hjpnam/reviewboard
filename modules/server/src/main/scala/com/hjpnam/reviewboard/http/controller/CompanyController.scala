@@ -1,32 +1,34 @@
 package com.hjpnam.reviewboard.http.controller
 
 import com.hjpnam.reviewboard.domain.data.Company
+import com.hjpnam.reviewboard.domain.error.HttpError
 import com.hjpnam.reviewboard.http.endpoint.CompanyEndpoint
 import com.hjpnam.reviewboard.service.CompanyService
-import sttp.tapir.*
+import sttp.tapir.ztapir.*
 import sttp.tapir.server.ServerEndpoint
 import zio.*
-
-import scala.collection.mutable
+import com.hjpnam.reviewboard.http.controller.syntax.*
 
 class CompanyController private (companyService: CompanyService)
     extends BaseController
     with CompanyEndpoint:
 
-  val create = createEndpoint.serverLogicSuccess[Task](companyService.create)
+  val create =
+    createEndpoint.zServerLogic[Any](req => companyService.create(req).mapToHttpError)
 
-  val getAll = getAllEndpoint.serverLogicSuccess[Task](_ => companyService.getAll)
+  val getAll = getAllEndpoint.zServerLogic[Any](_ => companyService.getAll.mapToHttpError)
 
-  val getById = getByIdEndpoint.serverLogicSuccess[Task] { id =>
+  val getById = getByIdEndpoint.zServerLogic[Any] { id =>
     ZIO
       .attempt(id.toLong)
       .flatMap(companyService.getById)
       .catchSome { case _: NumberFormatException =>
         companyService.getBySlug(id)
       }
+      .mapToHttpError
   }
 
-  override val routes: List[ServerEndpoint[Any, Task]] = create :: getAll :: getById :: Nil
+  override val routes: List[ZServerEndpoint[Any, Any]] = create :: getAll :: getById :: Nil
 
 object CompanyController:
   val makeZIO: URIO[CompanyService, CompanyController] =

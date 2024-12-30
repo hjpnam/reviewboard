@@ -1,23 +1,25 @@
 package com.hjpnam.reviewboard.http.controller
 
 import com.hjpnam.reviewboard.http.endpoint.ReviewEndpoint
+import com.hjpnam.reviewboard.http.controller.syntax.*
 import com.hjpnam.reviewboard.service.ReviewService
-import sttp.tapir.server.ServerEndpoint
+import sttp.tapir.ztapir.*
 import zio.{Task, URIO, ZIO}
 
 class ReviewController private (reviewService: ReviewService)
     extends BaseController
     with ReviewEndpoint:
 
-  val create = createEndpoint.serverLogicSuccess[Task](reviewService.create)
-  val getById = getByIdEndpoint.serverLogicSuccess[Task] { id =>
+  val create = createEndpoint.zServerLogic[Any](req => reviewService.create(req).mapToHttpError)
+  val getById = getByIdEndpoint.zServerLogic[Any] { id =>
     ZIO
       .attempt(id.toLong)
       .flatMap(reviewService.getById)
+      .mapToHttpError
   }
-  val getAll = getAllEndpoint.serverLogicSuccess[Task] { _ => reviewService.getAll }
+  val getAll = getAllEndpoint.zServerLogic[Any] { _ => reviewService.getAll.mapToHttpError }
 
-  override val routes: List[ServerEndpoint[Any, Task]] =
+  override val routes: List[ZServerEndpoint[Any, Any]] =
     create :: getById :: getAll :: Nil
 
 object ReviewController:

@@ -1,7 +1,7 @@
 package com.hjpnam.reviewboard.http.controller
 
-import sttp.tapir.server.ServerEndpoint
+import sttp.tapir.ztapir.ZServerEndpoint
 import zio.Task
 
 trait BaseController:
-  val routes: List[ServerEndpoint[Any, Task]]
+  val routes: List[ZServerEndpoint[Any, Any]]
