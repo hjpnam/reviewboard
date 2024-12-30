@@ -4,21 +4,23 @@ import com.auth0.jwt.JWT
 import com.auth0.jwt.JWTVerifier.BaseVerification
 import com.auth0.jwt.algorithms.Algorithm
 import com.auth0.jwt.interfaces.JWTVerifier
-import com.hjpnam.reviewboard.config.JWTConfig
+import com.hjpnam.reviewboard.config.{Configs, JWTConfig}
 import com.hjpnam.reviewboard.domain.data.{User, UserID, UserToken}
-import zio.{Clock, Task, ZIO, ZLayer}
+import zio.{Clock, Task, TaskLayer, URLayer, ZIO, ZLayer}
 
 trait JWTService:
   def createToken(user: User): Task[UserToken]
   def verifyToken(token: String): Task[UserID]
 
 object JWTService:
-  val live = ZLayer {
+  val live: URLayer[JWTConfig, JWTServiceLive] = ZLayer {
     for
       jwtConfig <- ZIO.service[JWTConfig]
       clock     <- Clock.javaClock
     yield new JWTServiceLive(jwtConfig, clock)
   }
+
+  val configuredLive: TaskLayer[JWTServiceLive] = Configs.makeLayer[JWTConfig]("app.jwt") >>> live
 
 class JWTServiceLive(jwtConfig: JWTConfig, clock: java.time.Clock) extends JWTService:
   private val ISSUER         = "hjpnam.com"
