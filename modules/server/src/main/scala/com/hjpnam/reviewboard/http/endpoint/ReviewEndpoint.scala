@@ -3,8 +3,8 @@ package com.hjpnam.reviewboard.http.endpoint
 import com.hjpnam.reviewboard.domain.data.Review
 import com.hjpnam.reviewboard.http.request.CreateReviewRequest
 import sttp.tapir.*
+import sttp.tapir.generic.auto.given
 import sttp.tapir.json.zio.jsonBody
-import sttp.tapir.generic.auto.*
 
 trait ReviewEndpoint extends BaseEndpoint:
   val createEndpoint = baseEndpoint

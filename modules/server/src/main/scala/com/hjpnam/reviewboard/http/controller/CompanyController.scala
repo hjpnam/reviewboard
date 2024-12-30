@@ -1,13 +1,11 @@
 package com.hjpnam.reviewboard.http.controller
 
 import com.hjpnam.reviewboard.domain.data.Company
-import com.hjpnam.reviewboard.domain.error.HttpError
+import com.hjpnam.reviewboard.http.controller.syntax.*
 import com.hjpnam.reviewboard.http.endpoint.CompanyEndpoint
 import com.hjpnam.reviewboard.service.CompanyService
-import sttp.tapir.ztapir.*
-import sttp.tapir.server.ServerEndpoint
-import zio.*
-import com.hjpnam.reviewboard.http.controller.syntax.*
+import sttp.tapir.ztapir.{ZServerEndpoint, given}
+import zio.{URIO, ZIO}
 
 class CompanyController private (companyService: CompanyService)
     extends BaseController

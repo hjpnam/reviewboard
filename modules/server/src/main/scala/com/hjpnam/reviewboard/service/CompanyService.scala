@@ -3,7 +3,7 @@ package com.hjpnam.reviewboard.service
 import com.hjpnam.reviewboard.domain.data.Company
 import com.hjpnam.reviewboard.http.request.CreateCompanyRequest
 import com.hjpnam.reviewboard.repository.CompanyRepository
-import zio.*
+import zio.{Task, ULayer, URLayer, ZIO, ZLayer}
 
 import scala.collection.mutable
 

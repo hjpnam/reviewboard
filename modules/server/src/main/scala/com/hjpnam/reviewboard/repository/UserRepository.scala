@@ -4,7 +4,7 @@ import com.hjpnam.reviewboard.domain.data.User
 import com.hjpnam.reviewboard.domain.error.ObjectNotFound
 import io.getquill.*
 import io.getquill.jdbczio.Quill
-import zio.*
+import zio.{Task, URLayer, ZIO, ZLayer}
 
 trait UserRepository:
   def create(user: User): Task[User]
@@ -22,7 +22,7 @@ object UserRepository:
 class UserRepositoryLive(quill: Quill.Postgres[SnakeCase]) extends UserRepository:
   import quill.*
 
-  inline given schema: SchemaMeta[User] = schemaMeta[User]("usr")
+  inline given schema: SchemaMeta[User]  = schemaMeta[User]("usr")
   inline given insMeta: InsertMeta[User] = insertMeta[User](_.id)
   inline given updMeta: UpdateMeta[User] = updateMeta[User](_.id)
 
@@ -34,7 +34,7 @@ class UserRepositoryLive(quill: Quill.Postgres[SnakeCase]) extends UserRepositor
 
   override def update(id: Long, op: User => User): Task[User] = for
     current <- getById(id).someOrFail(ObjectNotFound(s"row not found for id: $id"))
-    updated <- run{
+    updated <- run {
       query[User]
         .filter(_.id == lift(id))
         .updateValue(lift(op(current)))
@@ -46,7 +46,7 @@ class UserRepositoryLive(quill: Quill.Postgres[SnakeCase]) extends UserRepositor
     query[User].filter(_.id == lift(id))
   }.map(_.headOption)
 
-  override def getByEmail(email: String): Task[Option[User]] = run{
+  override def getByEmail(email: String): Task[Option[User]] = run {
     query[User].filter(_.email == lift(email))
   }.map(_.headOption)
 

@@ -4,7 +4,7 @@ import com.hjpnam.reviewboard.domain.data.Company
 import com.hjpnam.reviewboard.domain.error.ObjectNotFound
 import io.getquill.*
 import io.getquill.jdbczio.Quill
-import zio.*
+import zio.{Task, URLayer, ZIO, ZLayer}
 
 trait CompanyRepository:
   def create(company: Company): Task[Company]

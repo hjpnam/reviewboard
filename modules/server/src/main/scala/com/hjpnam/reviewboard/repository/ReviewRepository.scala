@@ -3,7 +3,7 @@ package com.hjpnam.reviewboard.repository
 import com.hjpnam.reviewboard.domain.data.Review
 import io.getquill.*
 import io.getquill.jdbczio.*
-import zio.*
+import zio.{Task, URLayer, ZIO, ZLayer}
 
 trait ReviewRepository:
   def create(review: Review): Task[Review]

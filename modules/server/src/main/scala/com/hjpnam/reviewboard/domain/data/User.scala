@@ -6,7 +6,10 @@ final case class User(
     id: Long,
     email: String,
     hashedPassword: String
-)
+):
+  def toUserID: UserID = UserID(id, email)
 
-object User:
-  given codec: JsonCodec[User] = DeriveJsonCodec.gen[User]
+final case class UserID(
+    id: Long,
+    email: String
+)

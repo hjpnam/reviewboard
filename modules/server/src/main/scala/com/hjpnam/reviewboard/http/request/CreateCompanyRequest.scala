@@ -1,8 +1,8 @@
 package com.hjpnam.reviewboard.http.request
 
 import com.hjpnam.reviewboard.domain.data.Company
+import io.github.arainko.ducktape.{into, Field}
 import zio.json.{DeriveJsonCodec, JsonCodec}
-import io.github.arainko.ducktape.*
 
 final case class CreateCompanyRequest(
     name: String,
