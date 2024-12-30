@@ -13,7 +13,7 @@ trait RepositorySpec:
     container.start()
     container
 
-  def createDataSource(container: PostgreSQLContainer[Nothing]) =
+  def createDataSource(container: PostgreSQLContainer[Nothing]): PGSimpleDataSource =
     val dataSource = new PGSimpleDataSource()
     dataSource.setURL(container.getJdbcUrl())
     dataSource.setUser(container.getUsername())

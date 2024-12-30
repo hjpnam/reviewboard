@@ -26,3 +26,9 @@ CREATE TABLE IF NOT EXISTS review (
     created TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+CREATE TABLE IF NOT EXISTS usr (
+    id BIGSERIAL PRIMARY KEY,
+    email TEXT UNIQUE NOT NULL,
+    hashed_password TEXT NOT NULL
+);

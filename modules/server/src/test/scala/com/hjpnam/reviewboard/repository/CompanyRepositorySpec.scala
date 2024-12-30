@@ -20,7 +20,7 @@ object CompanyRepositorySpec extends ZIOSpecDefault with RepositorySpec with Gen
       url = genString(8)
     )
 
-  override val initScriptPath = "sql/companies.sql"
+  override val initScriptPath = "sql/company.sql"
 
   override def spec: Spec[TestEnvironment & Scope, Any] =
     suite("CompanyRepositorySpec")(

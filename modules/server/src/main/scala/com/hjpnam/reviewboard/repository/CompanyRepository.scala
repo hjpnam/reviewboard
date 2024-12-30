@@ -1,6 +1,7 @@
 package com.hjpnam.reviewboard.repository
 
 import com.hjpnam.reviewboard.domain.data.Company
+import com.hjpnam.reviewboard.domain.error.ObjectNotFound
 import io.getquill.*
 import io.getquill.jdbczio.Quill
 import zio.*
@@ -34,7 +35,7 @@ class CompanyRepositoryLive(quill: Quill.Postgres[SnakeCase]) extends CompanyRep
 
   override def update(id: Long, op: Company => Company): Task[Company] =
     for
-      current <- getById(id).someOrFail(new RuntimeException(s"row not found for id: $id"))
+      current <- getById(id).someOrFail(ObjectNotFound(s"row not found for id: $id"))
       updated <- run {
         query[Company]
           .filter(_.id == lift(id))

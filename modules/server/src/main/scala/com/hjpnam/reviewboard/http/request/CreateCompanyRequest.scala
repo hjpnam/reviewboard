@@ -2,6 +2,7 @@ package com.hjpnam.reviewboard.http.request
 
 import com.hjpnam.reviewboard.domain.data.Company
 import zio.json.{DeriveJsonCodec, JsonCodec}
+import io.github.arainko.ducktape.*
 
 final case class CreateCompanyRequest(
     name: String,
@@ -13,7 +14,7 @@ final case class CreateCompanyRequest(
     tags: List[String] = Nil
 ):
   def toCompany(id: Long): Company =
-    Company(id, Company.makeSlug(name), name, url, location, country, industry, image, tags)
+    this.into[Company].transform(Field.const(_.id, id), Field.const(_.slug, Company.makeSlug(name)))
 
 object CreateCompanyRequest:
   given codec: JsonCodec[CreateCompanyRequest] = DeriveJsonCodec.gen[CreateCompanyRequest]
