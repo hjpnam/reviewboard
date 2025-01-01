@@ -1,7 +1,7 @@
 package com.hjpnam.reviewboard.service
 
 import com.hjpnam.reviewboard.domain.data.{User, UserToken}
-import com.hjpnam.reviewboard.domain.error.ObjectNotFound
+import com.hjpnam.reviewboard.domain.error.{ObjectNotFound, Unauthorized}
 import com.hjpnam.reviewboard.repository.UserRepository
 import zio.*
 
@@ -12,6 +12,8 @@ import javax.crypto.spec.PBEKeySpec
 trait UserService:
   def registerUser(email: String, password: String): Task[User]
   def verifyPassword(email: String, password: String): Task[Boolean]
+  def updatePassword(email: String, oldPassword: String, newPassword: String): Task[User]
+  def deleteUser(email: String, password: String): Task[User]
   def generateToken(email: String, password: String): Task[Option[UserToken]]
 
 object UserService:
@@ -29,19 +31,49 @@ class UserServiceLive(jwtService: JWTService, userRepo: UserRepository) extends 
     userRepo.create(User(id = -1L, email, hashedPassword = generateHash(password)))
 
   override def verifyPassword(email: String, password: String): Task[Boolean] = for
-    existingUser <- userRepo
+    maybeExistingUser <- userRepo
       .getByEmail(email)
-      .someOrFail(ObjectNotFound(s"cannot verify user $email not found"))
-    result <- ZIO.attempt(validateHash(password, existingUser.hashedPassword))
+    result <- maybeExistingUser.fold(ZIO.succeed(false))(existingUser =>
+      ZIO.attempt(validateHash(password, existingUser.hashedPassword)).orElseSucceed(false)
+    )
   yield result
+
+  override def updatePassword(email: String, oldPassword: String, newPassword: String): Task[User] =
+    for
+      existingUser <- userRepo
+        .getByEmail(email)
+        .someOrFail(ObjectNotFound(s"cannot update user $email: user not found"))
+      verified <- ZIO.attempt(validateHash(oldPassword, existingUser.hashedPassword))
+      updatedUser <-
+        if verified then updatePassword(newPassword, existingUser)
+        else ZIO.fail(Unauthorized("wrong password"))
+    yield updatedUser
+
+  override def deleteUser(email: String, password: String): Task[User] =
+    for
+      existingUser <- userRepo
+        .getByEmail(email)
+        .someOrFail(ObjectNotFound(s"cannot update user $email: user not found"))
+      verified <- ZIO.attempt(validateHash(password, existingUser.hashedPassword))
+      updatedUser <-
+        if verified then userRepo.delete(existingUser.id)
+        else ZIO.fail(Unauthorized("wrong password"))
+    yield updatedUser
 
   override def generateToken(email: String, password: String): Task[Option[UserToken]] = for
     existingUser <- userRepo
       .getByEmail(email)
-      .someOrFail(new ObjectNotFound(s"cannot verify user $email: user not found"))
+      .someOrFail(ObjectNotFound(s"cannot verify user $email: user not found"))
     verified   <- ZIO.attempt(validateHash(password, existingUser.hashedPassword))
     maybeToken <- jwtService.createToken(existingUser).when(verified)
   yield maybeToken
+
+  private def updatePassword(newPassword: String, existingUser: User) =
+    userRepo
+      .update(
+        existingUser.id,
+        user => user.copy(hashedPassword = generateHash(newPassword))
+      )
 
 object UserServiceLive:
   object Hasher:
