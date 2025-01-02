@@ -1,13 +1,15 @@
 package com.hjpnam.reviewboard
 
+import com.hjpnam.reviewboard.config.{Configs, JWTConfig}
 import com.hjpnam.reviewboard.http.HttpApi
 import com.hjpnam.reviewboard.repository.{
   CompanyRepository,
   CompanyRepositoryLive,
   Repository,
-  ReviewRepository
+  ReviewRepository,
+  UserRepository
 }
-import com.hjpnam.reviewboard.service.{CompanyService, ReviewService}
+import com.hjpnam.reviewboard.service.{CompanyService, JWTService, ReviewService, UserService}
 import io.getquill.SnakeCase
 import sttp.tapir.server.ziohttp.ZioHttpInterpreter
 import zio.*
@@ -25,9 +27,16 @@ object Application extends ZIOAppDefault:
   override def run =
     serverProgram.provide(
       Server.default,
+      // config
+      Configs.makeLayer[JWTConfig]("app.jwt"),
+      // service
       CompanyService.live,
-      CompanyRepository.live,
       ReviewService.live,
+      UserService.live,
+      JWTService.live,
+      // repository
+      CompanyRepository.live,
       ReviewRepository.live,
+      UserRepository.live,
       Repository.dataLayer
     )
