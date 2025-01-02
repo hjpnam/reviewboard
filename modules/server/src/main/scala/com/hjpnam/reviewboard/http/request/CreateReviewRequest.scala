@@ -1,7 +1,8 @@
 package com.hjpnam.reviewboard.http.request
 
 import com.hjpnam.reviewboard.domain.data.Review
-import zio.json.{DeriveJsonCodec, JsonCodec}
+import zio.json.JsonCodec
+
 import java.time.Instant
 
 case class CreateReviewRequest(
@@ -13,7 +14,7 @@ case class CreateReviewRequest(
     benefits: Int,
     wouldRecommend: Int,
     review: String
-):
+) derives JsonCodec:
   def toReview(id: Long, timestamp: Instant): Review =
     Review(
       id,
@@ -28,6 +29,3 @@ case class CreateReviewRequest(
       timestamp,
       timestamp
     )
-
-object CreateReviewRequest:
-  given codec: JsonCodec[CreateReviewRequest] = DeriveJsonCodec.gen[CreateReviewRequest]

@@ -9,7 +9,7 @@ import zio.test.*
 
 import java.sql.SQLException
 
-object CompanyRepositorySpec extends ZIOSpecDefault with RepositorySpec with Gen:
+object CompanyRepositorySpec extends ZIOSpecDefault, RepositorySpec, Gen:
   private val fooCompany = Company(1L, "foo", "foo", "foo.com")
 
   private def genCompany(): Company =

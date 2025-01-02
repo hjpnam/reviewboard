@@ -11,7 +11,7 @@ import zio.*
 import zio.json.*
 import zio.test.*
 
-object CompanyControllerSpec extends ZIOSpecDefault with BackendStub:
+object CompanyControllerSpec extends ZIOSpecDefault, BackendStub:
   private val testCompany = Company(1, "foo", "foo", "foo.com")
   private val serviceStub = new CompanyService {
     override def create(createRequest: CreateCompanyRequest): Task[Company] =

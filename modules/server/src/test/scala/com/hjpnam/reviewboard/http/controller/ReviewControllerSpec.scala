@@ -13,7 +13,7 @@ import zio.test.*
 
 import java.time.Instant
 
-object ReviewControllerSpec extends ZIOSpecDefault with BackendStub:
+object ReviewControllerSpec extends ZIOSpecDefault, BackendStub:
 
   private val now = Instant.now()
 

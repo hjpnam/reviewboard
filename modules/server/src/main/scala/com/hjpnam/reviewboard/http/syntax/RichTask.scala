@@ -1,4 +1,4 @@
-package com.hjpnam.reviewboard.http.controller.syntax
+package com.hjpnam.reviewboard.http.syntax
 
 import com.hjpnam.reviewboard.domain.error.HttpError
 import zio.{Task, ZIO}

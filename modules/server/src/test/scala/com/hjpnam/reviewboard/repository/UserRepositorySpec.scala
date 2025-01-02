@@ -6,7 +6,7 @@ import com.hjpnam.reviewboard.syntax.*
 import zio.*
 import zio.test.*
 
-object UserRepositorySpec extends ZIOSpecDefault with RepositorySpec with Gen:
+object UserRepositorySpec extends ZIOSpecDefault, RepositorySpec, Gen:
   override val initScriptPath = "sql/user.sql"
 
   private def genUser: User =

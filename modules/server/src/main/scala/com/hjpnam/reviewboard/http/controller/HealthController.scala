@@ -4,7 +4,7 @@ import com.hjpnam.reviewboard.http.endpoint.HealthEndpoint
 import sttp.tapir.ztapir.{ZServerEndpoint, given}
 import zio.{UIO, ZIO}
 
-class HealthController private extends BaseController with HealthEndpoint:
+class HealthController private extends BaseController, HealthEndpoint:
   val health = healthCheck.zServerLogic[Any](_ => ZIO.succeed("all good"))
   override val routes: List[ZServerEndpoint[Any, Any]] = health :: Nil
 

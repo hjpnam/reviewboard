@@ -1,8 +1,8 @@
 package com.hjpnam.reviewboard.http.controller
 
-import com.hjpnam.reviewboard.http.controller.syntax.*
 import com.hjpnam.reviewboard.http.endpoint.ReviewEndpoint
 import com.hjpnam.reviewboard.service.ReviewService
+import com.hjpnam.reviewboard.http.syntax.*
 import sttp.tapir.ztapir.{ZServerEndpoint, given}
 import zio.{URIO, ZIO}
 

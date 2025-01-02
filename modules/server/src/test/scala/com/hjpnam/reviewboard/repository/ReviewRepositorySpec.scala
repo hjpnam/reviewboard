@@ -8,7 +8,7 @@ import zio.test.*
 
 import java.time.Instant
 
-object ReviewRepositorySpec extends ZIOSpecDefault with RepositorySpec with Gen:
+object ReviewRepositorySpec extends ZIOSpecDefault, RepositorySpec, Gen:
   private val testInstant = Instant.now()
 
   private val testReview = Review(

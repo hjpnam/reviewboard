@@ -1,15 +1,15 @@
 package com.hjpnam.reviewboard.http.controller
 
 import com.hjpnam.reviewboard.domain.data.Company
-import com.hjpnam.reviewboard.http.controller.syntax.*
+import com.hjpnam.reviewboard.http.syntax.*
 import com.hjpnam.reviewboard.http.endpoint.CompanyEndpoint
 import com.hjpnam.reviewboard.service.CompanyService
 import sttp.tapir.ztapir.{ZServerEndpoint, given}
 import zio.{URIO, ZIO}
 
 class CompanyController private (companyService: CompanyService)
-    extends BaseController
-    with CompanyEndpoint:
+    extends BaseController,
+      CompanyEndpoint:
 
   val create =
     createEndpoint.zServerLogic[Any](req => companyService.create(req).mapToHttpError)
