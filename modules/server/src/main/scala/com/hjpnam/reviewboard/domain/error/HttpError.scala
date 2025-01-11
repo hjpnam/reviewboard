@@ -14,8 +14,8 @@ object HttpError:
 
   def apply(throwable: Throwable): HttpError =
     val statusCode = throwable match
-      case _: ObjectNotFound                          => StatusCode.NotFound
+      case _: ObjectNotFound                            => StatusCode.NotFound
       case _: (Unauthorized | JWTVerificationException) => StatusCode.Unauthorized
-      case _                                          => StatusCode.InternalServerError
+      case _                                            => StatusCode.InternalServerError
 
     HttpError(statusCode, throwable.getMessage)
