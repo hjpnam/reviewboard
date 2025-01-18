@@ -2,6 +2,7 @@ package com.hjpnam.reviewboard.http.controller
 
 import com.hjpnam.reviewboard.domain.error.Unauthorized
 import com.hjpnam.reviewboard.http.endpoint.{SecureBaseEndpoint, UserEndpoint}
+import com.hjpnam.reviewboard.http.request.RecoverPasswordRequest
 import com.hjpnam.reviewboard.http.response.UserResponse
 import com.hjpnam.reviewboard.http.syntax.*
 import com.hjpnam.reviewboard.service.{JWTService, UserService}
@@ -42,8 +43,20 @@ class UserController private (userService: UserService, jwtService: JWTService)
         .mapToHttpError
     }
 
+  val forgotPassword = forgotPasswordEndpoint
+    .zServerLogic[Any] { req => userService.sendPasswordRecoveryToken(req.email).mapToHttpError }
+
+  val recoverPassword = recoverPasswordEndpoint
+    .zServerLogic[Any] { case RecoverPasswordRequest(email, token, newPassword) =>
+      userService
+        .recoverPassword(email, token, newPassword)
+        .filterOrFail(identity)(Unauthorized(""))
+        .unit
+        .mapToHttpError
+    }
+
   override val routes: List[ZServerEndpoint[Any, Any]] =
-    createUser :: login :: updatePassword :: deleteUser :: Nil
+    createUser :: login :: updatePassword :: deleteUser :: forgotPassword :: recoverPassword :: Nil
 
 object UserController:
   val makeZIO: ZIO[JWTService & UserService, Nothing, UserController] =

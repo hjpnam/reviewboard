@@ -15,12 +15,12 @@ trait ReviewRepository:
   def get: Task[List[Review]]
 
 object ReviewRepository:
-  val live: URLayer[Quill.Postgres[SnakeCase], ReviewRepository] = ZLayer {
-    for quill <- ZIO.service[Quill.Postgres[SnakeCase]]
+  val live: URLayer[Quill.Postgres[SnakeCase.type], ReviewRepository] = ZLayer {
+    for quill <- ZIO.service[Quill.Postgres[SnakeCase.type]]
     yield new ReviewRepositoryLive(quill)
   }
 
-class ReviewRepositoryLive(quill: Quill.Postgres[SnakeCase]) extends ReviewRepository:
+class ReviewRepositoryLive(quill: Quill.Postgres[SnakeCase.type]) extends ReviewRepository:
   import quill.*
 
   inline given schema: SchemaMeta[Review]  = schemaMeta[Review]("review")

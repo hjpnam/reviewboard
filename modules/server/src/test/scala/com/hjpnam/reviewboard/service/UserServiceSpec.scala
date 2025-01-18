@@ -2,43 +2,27 @@ package com.hjpnam.reviewboard.service
 
 import com.hjpnam.reviewboard.domain.data.{User, UserID, UserToken}
 import com.hjpnam.reviewboard.domain.error.{ObjectNotFound, Unauthorized}
-import com.hjpnam.reviewboard.repository.UserRepository
+import com.hjpnam.reviewboard.fixture.RepoStub
+import com.hjpnam.reviewboard.repository.{RecoveryTokenRepository, UserRepository}
 import zio.test.*
 import zio.test.Assertion.*
 import zio.{Scope, Task, ZIO, ZLayer}
 
 import scala.collection.mutable
 
-object UserServiceSpec extends ZIOSpecDefault:
-  val testUser = User(
-    1L,
-    "test@email.com",
-    "1000:da70ffa630dc4793f0e4a64a8ca1aa1ae5892a29da5ce97d:2d1538385faf4154231d6fae95e09306efd841b32e9eb0bc"
-  )
-  val stubUserRepoLayer = ZLayer.succeed(
-    new UserRepository:
-      val db = mutable.Map(1L -> testUser)
-      override def create(user: User): Task[User] = ZIO.succeed {
-        db += (user.id -> user)
-        user
-      }
+object UserServiceSpec extends ZIOSpecDefault, RepoStub:
+  val stubTokenRepoLayer = ZLayer.succeed(
+    new RecoveryTokenRepository:
+      val db = mutable.Map.empty[String, String]
+      override def getToken(email: String): Task[Option[String]] =
+        ZIO.attempt {
+          val token = "RECOVERY"
+          db += (email -> token)
+          Some(token)
+        }
 
-      override def update(id: Long, op: User => User): Task[User] = ZIO.succeed {
-        val newUser = op(db(id))
-        db += (newUser.id -> newUser)
-        newUser
-      }
-
-      override def getById(id: Long): Task[Option[User]] = ZIO.succeed(db.get(id))
-
-      override def getByEmail(email: String): Task[Option[User]] =
-        ZIO.succeed(db.values.find(_.email == email))
-
-      override def delete(id: Long): Task[User] = ZIO.succeed {
-        val user = db(id)
-        db -= id
-        user
-      }
+      override def checkToken(email: String, token: String): Task[Boolean] =
+        ZIO.attempt(db.get(email).contains(token))
   )
 
   val stubJWTServiceLayer = ZLayer.succeed(
@@ -47,6 +31,13 @@ object UserServiceSpec extends ZIOSpecDefault:
         ZIO.succeed(UserToken(user.email, "test-token", Long.MaxValue))
       override def verifyToken(token: String): Task[UserID] =
         ZIO.succeed(UserID(testUser.id, testUser.email))
+  )
+
+  val stubEmailServiceLayer = ZLayer.succeed(
+    new EmailService:
+      override def sendEmail(to: String, subject: String, content: String): Task[Unit] = ZIO.unit
+
+      override def sendPasswordRecoveryEmail(to: String, token: String): Task[Unit] = ZIO.unit
   )
 
   override def spec: Spec[TestEnvironment with Scope, Any] =
@@ -97,5 +88,20 @@ object UserServiceSpec extends ZIOSpecDefault:
           service <- ZIO.service[UserService]
           user    <- service.deleteUser(testUser.email, "password")
         yield assert(user)(hasField("email", _.email, equalTo(testUser.email)))
+      },
+      test("recover password") {
+        val newPassword = "newpassword"
+        for
+          service <- ZIO.service[UserService]
+          _       <- service.sendPasswordRecoveryToken(testEmail)
+          _       <- service.recoverPassword(testEmail, "RECOVERY", newPassword)
+          valid   <- service.verifyPassword(testEmail, newPassword)
+        yield assertTrue(valid)
       }
-    ).provide(UserService.live, stubUserRepoLayer, stubJWTServiceLayer)
+    ).provide(
+      UserService.live,
+      stubJWTServiceLayer,
+      stubEmailServiceLayer,
+      stubUserRepoLayer,
+      stubTokenRepoLayer
+    )

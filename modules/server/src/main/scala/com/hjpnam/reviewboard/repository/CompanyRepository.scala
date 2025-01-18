@@ -15,12 +15,12 @@ trait CompanyRepository:
   def get: Task[List[Company]]
 
 object CompanyRepository:
-  val live: URLayer[Quill.Postgres[SnakeCase], CompanyRepositoryLive] = ZLayer {
-    for quill <- ZIO.service[Quill.Postgres[SnakeCase]]
+  val live: URLayer[Quill.Postgres[SnakeCase.type], CompanyRepositoryLive] = ZLayer {
+    for quill <- ZIO.service[Quill.Postgres[SnakeCase.type]]
     yield new CompanyRepositoryLive(quill)
   }
 
-class CompanyRepositoryLive(quill: Quill.Postgres[SnakeCase]) extends CompanyRepository:
+class CompanyRepositoryLive(quill: Quill.Postgres[SnakeCase.type]) extends CompanyRepository:
   import quill.*
 
   inline given schema: SchemaMeta[Company]  = schemaMeta[Company]("company")

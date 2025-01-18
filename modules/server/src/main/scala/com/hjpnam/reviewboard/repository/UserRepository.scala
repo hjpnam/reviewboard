@@ -14,12 +14,12 @@ trait UserRepository:
   def delete(id: Long): Task[User]
 
 object UserRepository:
-  val live: URLayer[Quill.Postgres[SnakeCase], UserRepositoryLive] = ZLayer {
-    for quill <- ZIO.service[Quill.Postgres[SnakeCase]]
+  val live: URLayer[Quill.Postgres[SnakeCase.type], UserRepositoryLive] = ZLayer {
+    for quill <- ZIO.service[Quill.Postgres[SnakeCase.type]]
     yield new UserRepositoryLive(quill)
   }
 
-class UserRepositoryLive(quill: Quill.Postgres[SnakeCase]) extends UserRepository:
+class UserRepositoryLive(quill: Quill.Postgres[SnakeCase.type]) extends UserRepository:
   import quill.*
 
   inline given schema: SchemaMeta[User]  = schemaMeta[User]("usr")

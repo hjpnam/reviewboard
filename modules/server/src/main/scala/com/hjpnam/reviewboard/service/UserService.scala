@@ -1,9 +1,11 @@
 package com.hjpnam.reviewboard.service
 
+import cats.data.OptionT
 import com.hjpnam.reviewboard.domain.data.{User, UserToken}
 import com.hjpnam.reviewboard.domain.error.{ObjectNotFound, Unauthorized}
-import com.hjpnam.reviewboard.repository.UserRepository
+import com.hjpnam.reviewboard.repository.{RecoveryTokenRepository, UserRepository}
 import zio.*
+import zio.interop.catz.core._
 
 import java.security.SecureRandom
 import javax.crypto.SecretKeyFactory
@@ -15,16 +17,25 @@ trait UserService:
   def updatePassword(email: String, oldPassword: String, newPassword: String): Task[User]
   def deleteUser(email: String, password: String): Task[User]
   def generateToken(email: String, password: String): Task[Option[UserToken]]
+  def sendPasswordRecoveryToken(email: String): Task[Unit]
+  def recoverPassword(email: String, token: String, newPassword: String): Task[Boolean]
 
 object UserService:
-  val live: URLayer[JWTService & UserRepository, UserServiceLive] = ZLayer {
+  val live = ZLayer {
     for {
-      repository <- ZIO.service[UserRepository]
-      jwtService <- ZIO.service[JWTService]
-    } yield new UserServiceLive(jwtService, repository)
+      repository        <- ZIO.service[UserRepository]
+      jwtService        <- ZIO.service[JWTService]
+      emailService      <- ZIO.service[EmailService]
+      recoveryTokenRepo <- ZIO.service[RecoveryTokenRepository]
+    } yield new UserServiceLive(jwtService, emailService, repository, recoveryTokenRepo)
   }
 
-class UserServiceLive(jwtService: JWTService, userRepo: UserRepository) extends UserService:
+class UserServiceLive(
+    jwtService: JWTService,
+    emailService: EmailService,
+    userRepo: UserRepository,
+    recoveryTokenRepo: RecoveryTokenRepository
+) extends UserService:
   import UserServiceLive.Hasher.*
 
   override def registerUser(email: String, password: String): Task[User] =
@@ -68,6 +79,20 @@ class UserServiceLive(jwtService: JWTService, userRepo: UserRepository) extends 
     maybeToken <- jwtService.createToken(existingUser).when(verified)
   yield maybeToken
 
+  override def sendPasswordRecoveryToken(email: String): Task[Unit] =
+    OptionT(recoveryTokenRepo.getToken(email))
+      .foldF(ZIO.unit)(token => emailService.sendPasswordRecoveryEmail(email, token))
+
+  override def recoverPassword(email: String, token: String, newPassword: String): Task[Boolean] =
+    for
+      existingUser <- userRepo.getByEmail(email).someOrFail(ObjectNotFound("user not found"))
+      tokenIsValid <- recoveryTokenRepo.checkToken(email, token)
+      updateResult <- userRepo
+        .update(existingUser.id, _.copy(hashedPassword = generateHash(newPassword)))
+        .when(tokenIsValid)
+        .map(_.nonEmpty)
+    yield updateResult
+
   private def updatePassword(newPassword: String, existingUser: User) =
     userRepo
       .update(
@@ -93,11 +118,13 @@ object UserServiceLive:
       skf.generateSecret(keySpec).getEncoded
 
     private def toHex(array: Array[Byte]): String = array.map(byte => "%02x".format(byte)).mkString
+
     private def fromHex(string: String): Array[Byte] =
       string
         .sliding(2, 2)
         .map(hexValue => Integer.parseInt(hexValue, 16).toByte)
         .toArray
+
     private def compareBytes(a: Array[Byte], b: Array[Byte]): Boolean =
       val range = 0 until a.length.min(b.length)
       val diff = range.foldLeft(a.length ^ b.length) { case (acc, i) =>

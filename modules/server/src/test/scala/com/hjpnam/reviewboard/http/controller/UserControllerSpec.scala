@@ -39,6 +39,11 @@ object UserControllerSpec extends ZIOSpecDefault, BackendStub:
     override def generateToken(email: String, password: String): Task[Option[UserToken]] = ZIO.when(
       email == testUser.email && password == testUser.hashedPassword
     )(ZIO.succeed(UserToken(testUser.email, "test-token", 3600L)))
+
+    override def recoverPassword(email: String, token: String, newPassword: String): Task[Boolean] =
+      ???
+
+    override def sendPasswordRecoveryToken(email: String): Task[Unit] = ???
   })
 
   private val jwtServiceStub = ZLayer.succeed(new JWTService {

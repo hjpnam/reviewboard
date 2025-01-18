@@ -16,6 +16,7 @@ val zioConfigVersion  = "4.0.2"
 val sttpVersion       = "3.10.1"
 val javaMailVersion   = "1.6.2"
 val stripeVersion     = "24.3.0"
+val catsVersion       = "2.12.0"
 
 val dependencies = Seq(
   "com.softwaremill.sttp.tapir"   %% "tapir-sttp-client"                 % tapirVersion,
@@ -37,6 +38,7 @@ val dependencies = Seq(
   "dev.zio"                       %% "zio-config"                        % zioConfigVersion,
   "dev.zio"                       %% "zio-config-magnolia"               % zioConfigVersion,
   "dev.zio"                       %% "zio-config-typesafe"               % zioConfigVersion,
+  "dev.zio"                       %% "zio-interop-cats"                  % "22.0.0.0",
   "io.getquill"                   %% "quill-jdbc-zio"                    % "4.7.3",
   "org.postgresql"                 % "postgresql"                        % "42.5.0",
   "org.flywaydb"                   % "flyway-core"                       % "9.7.0",
@@ -45,7 +47,8 @@ val dependencies = Seq(
   "com.auth0"                      % "java-jwt"                          % "4.2.1",
   "com.sun.mail"                   % "javax.mail"                        % javaMailVersion,
   "com.stripe"                     % "stripe-java"                       % stripeVersion,
-  "io.github.arainko"             %% "ducktape"                          % "0.2.6"
+  "io.github.arainko"             %% "ducktape"                          % "0.2.6",
+  "org.typelevel"                 %% "cats-core"                         % catsVersion
 )
 
 lazy val foundations = (project in file("modules/foundations"))
