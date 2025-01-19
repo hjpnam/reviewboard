@@ -51,11 +51,6 @@ val dependencies = Seq(
   "org.typelevel"                 %% "cats-core"                         % catsVersion
 )
 
-lazy val foundations = (project in file("modules/foundations"))
-  .settings(
-    libraryDependencies ++= dependencies
-  )
-
 lazy val server = (project in file("modules/server"))
   .settings(
     libraryDependencies ++= dependencies
@@ -65,5 +60,5 @@ lazy val root = (project in file("."))
   .settings(
     name := "zio-rite"
   )
-  .aggregate(foundations, server)
-  .dependsOn(foundations, server)
+  .aggregate(server)
+  .dependsOn(server)
