@@ -3,18 +3,14 @@ package com.hjpnam.reviewboard.http.controller
 import com.hjpnam.reviewboard.domain.data.UserToken
 import com.hjpnam.reviewboard.fixture.{ServiceStub, TestObject}
 import com.hjpnam.reviewboard.http.controller.util.BackendStub
-import com.hjpnam.reviewboard.http.request.{
-  LoginRequest,
-  RegisterUserRequest,
-  UpdatePasswordRequest
-}
+import com.hjpnam.reviewboard.http.request.{LoginRequest, RegisterUserRequest, UpdatePasswordRequest}
 import com.hjpnam.reviewboard.http.response.UserResponse
 import com.hjpnam.reviewboard.service.{JWTService, UserService}
-import zio.test.*
-import zio.test.Assertion.*
 import sttp.client3.*
 import sttp.tapir.server.ServerEndpoint
 import zio.json.*
+import zio.test.*
+import zio.test.Assertion.*
 import zio.{Scope, Task, ZIO, ZLayer}
 
 object UserControllerSpec extends ZIOSpecDefault, BackendStub, TestObject, ServiceStub:

@@ -1,12 +1,6 @@
 package com.hjpnam.reviewboard.http
 
-import com.hjpnam.reviewboard.http.controller.{
-  BaseController,
-  CompanyController,
-  HealthController,
-  ReviewController,
-  UserController
-}
+import com.hjpnam.reviewboard.http.controller.*
 
 object HttpApi:
   def gatherRoutes(controllers: List[BaseController]) =

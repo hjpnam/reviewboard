@@ -1,10 +1,10 @@
 package com.hjpnam.reviewboard.http.controller
 
 import com.hjpnam.reviewboard.http.endpoint.{ReviewEndpoint, SecureBaseEndpoint}
-import com.hjpnam.reviewboard.service.{JWTService, ReviewService}
 import com.hjpnam.reviewboard.http.syntax.*
-import sttp.tapir.ztapir.{ZServerEndpoint, given}
-import zio.{URIO, ZIO}
+import com.hjpnam.reviewboard.service.{JWTService, ReviewService}
+import sttp.tapir.ztapir.ZServerEndpoint
+import zio.ZIO
 
 class ReviewController private (reviewService: ReviewService, jwtService: JWTService)
     extends BaseController

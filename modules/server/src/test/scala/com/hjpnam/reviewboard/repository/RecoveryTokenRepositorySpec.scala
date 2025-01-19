@@ -4,8 +4,8 @@ import com.hjpnam.reviewboard.config.RecoveryTokenConfig
 import com.hjpnam.reviewboard.fixture.{RepoStub, TestObject}
 import com.hjpnam.reviewboard.repository.CompanyRepositorySpec.dataSourceLayer
 import zio.test.*
-import zio.{Scope, ZIO, ZLayer}
 import zio.test.Assertion.*
+import zio.{Scope, ZIO, ZLayer}
 
 object RecoveryTokenRepositorySpec extends ZIOSpecDefault, RepositorySpec, TestObject, RepoStub:
   override val initScriptPath = "sql/recovery-token.sql"

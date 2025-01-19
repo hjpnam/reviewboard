@@ -4,8 +4,8 @@ import com.hjpnam.reviewboard.config.{Configs, EmailConfig}
 import zio.*
 
 import java.util.Properties
+import javax.mail.*
 import javax.mail.internet.MimeMessage
-import javax.mail.{Authenticator, Message, PasswordAuthentication, Session, Transport}
 
 trait EmailService:
   def sendEmail(to: String, subject: String, content: String): Task[Unit]

@@ -1,8 +1,8 @@
 package com.hjpnam.reviewboard.repository
 
 import com.hjpnam.reviewboard.domain.data.User
-import com.hjpnam.reviewboard.util.Gen
 import com.hjpnam.reviewboard.syntax.*
+import com.hjpnam.reviewboard.util.Gen
 import zio.*
 import zio.test.*
 

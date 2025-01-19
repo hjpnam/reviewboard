@@ -1,7 +1,7 @@
 package com.hjpnam.reviewboard.domain.data
 
-import zio.json.{DeriveJsonCodec, JsonCodec}
 import io.github.arainko.ducktape.into
+import zio.json.{DeriveJsonCodec, JsonCodec}
 
 final case class User(
     id: Long,

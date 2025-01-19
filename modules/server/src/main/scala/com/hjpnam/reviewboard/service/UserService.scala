@@ -5,7 +5,7 @@ import com.hjpnam.reviewboard.domain.data.{User, UserToken}
 import com.hjpnam.reviewboard.domain.error.{ObjectNotFound, Unauthorized}
 import com.hjpnam.reviewboard.repository.{RecoveryTokenRepository, UserRepository}
 import zio.*
-import zio.interop.catz.core._
+import zio.interop.catz.core.*
 
 import java.security.SecureRandom
 import javax.crypto.SecretKeyFactory

@@ -5,12 +5,7 @@ import com.hjpnam.reviewboard.domain.data.UserToken
 import com.hjpnam.reviewboard.http.controller.*
 import com.hjpnam.reviewboard.http.request.*
 import com.hjpnam.reviewboard.http.response.UserResponse
-import com.hjpnam.reviewboard.repository.{
-  RecoveryTokenRepository,
-  Repository,
-  RepositorySpec,
-  UserRepository
-}
+import com.hjpnam.reviewboard.repository.{RecoveryTokenRepository, Repository, RepositorySpec, UserRepository}
 import com.hjpnam.reviewboard.service.*
 import sttp.client3.testing.SttpBackendStub
 import sttp.client3.{HttpError as _, *}

@@ -1,9 +1,9 @@
 package com.hjpnam.reviewboard.http.request
 
 import com.hjpnam.reviewboard.domain.data.Review
+import io.github.arainko.ducktape.{into, Field}
 import zio.json.JsonCodec
 
-import io.github.arainko.ducktape.{into, Field}
 import java.time.Instant
 
 case class CreateReviewRequest(
