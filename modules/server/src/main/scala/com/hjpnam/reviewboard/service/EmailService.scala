@@ -1,11 +1,11 @@
 package com.hjpnam.reviewboard.service
 
 import com.hjpnam.reviewboard.config.{Configs, EmailConfig}
+import jakarta.mail.internet.MimeMessage
+import jakarta.mail.{Authenticator, Message, PasswordAuthentication, Session, Transport}
 import zio.*
 
 import java.util.Properties
-import javax.mail.*
-import javax.mail.internet.MimeMessage
 
 trait EmailService:
   def sendEmail(to: String, subject: String, content: String): Task[Unit]

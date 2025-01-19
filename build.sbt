@@ -50,7 +50,8 @@ val serverDependencies = commonDependencies ++ Seq(
   "com.sun.mail"           % "javax.mail"                        % javaMailVersion,
   "com.stripe"             % "stripe-java"                       % stripeVersion,
   "io.github.arainko"     %% "ducktape"                          % "0.2.7",
-  "org.typelevel"         %% "cats-core"                         % catsVersion
+  "org.typelevel"         %% "cats-core"                         % catsVersion,
+  "org.eclipse.angus"      % "angus-mail"                        % "2.0.3"
 )
 
 lazy val common = crossProject(JVMPlatform, JSPlatform)
