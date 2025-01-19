@@ -28,7 +28,7 @@ object CompanyControllerSpec extends ZIOSpecDefault, BackendStub:
 
   private val controllerBackendStubZIO: (
       CompanyController => List[ServerEndpoint[Any, Task]]
-  ) => ZIO[CompanyService, Nothing, SttpBackend[Task, Any]] = backendStubZIO(
+  ) => ZIO[CompanyService, Nothing, SttpBackend[Task, Nothing]] = backendStubZIO(
     CompanyController.makeZIO
   )
 

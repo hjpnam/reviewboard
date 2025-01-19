@@ -3,11 +3,11 @@ package com.hjpnam.reviewboard.http.request
 import com.hjpnam.reviewboard.domain.data.Review
 import zio.json.JsonCodec
 
+import io.github.arainko.ducktape.{into, Field}
 import java.time.Instant
 
 case class CreateReviewRequest(
     companyId: Long,
-    userId: Long,
     management: Int,
     culture: Int,
     salaries: Int,
@@ -15,17 +15,12 @@ case class CreateReviewRequest(
     wouldRecommend: Int,
     review: String
 ) derives JsonCodec:
-  def toReview(id: Long, timestamp: Instant): Review =
-    Review(
-      id,
-      companyId,
-      userId,
-      management,
-      culture,
-      salaries,
-      benefits,
-      wouldRecommend,
-      review,
-      timestamp,
-      timestamp
-    )
+  def toReview(id: Long, userId: Long, timestamp: Instant): Review =
+    this
+      .into[Review]
+      .transform(
+        Field.const(_.id, id),
+        Field.const(_.userId, userId),
+        Field.const(_.created, timestamp),
+        Field.const(_.updated, timestamp)
+      )

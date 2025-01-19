@@ -2,7 +2,7 @@ package com.hjpnam.reviewboard.service
 
 import com.hjpnam.reviewboard.domain.data.{User, UserID, UserToken}
 import com.hjpnam.reviewboard.domain.error.{ObjectNotFound, Unauthorized}
-import com.hjpnam.reviewboard.fixture.RepoStub
+import com.hjpnam.reviewboard.fixture.{RepoStub, TestObject}
 import com.hjpnam.reviewboard.repository.{RecoveryTokenRepository, UserRepository}
 import zio.test.*
 import zio.test.Assertion.*
@@ -10,7 +10,7 @@ import zio.{Scope, Task, ZIO, ZLayer}
 
 import scala.collection.mutable
 
-object UserServiceSpec extends ZIOSpecDefault, RepoStub:
+object UserServiceSpec extends ZIOSpecDefault, TestObject, RepoStub:
   val stubTokenRepoLayer = ZLayer.succeed(
     new RecoveryTokenRepository:
       val db = mutable.Map.empty[String, String]

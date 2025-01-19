@@ -1,7 +1,7 @@
 package com.hjpnam.reviewboard.http.controller
 
-import com.auth0.jwt.exceptions.JWTVerificationException
-import com.hjpnam.reviewboard.domain.data.{User, UserID, UserToken}
+import com.hjpnam.reviewboard.domain.data.UserToken
+import com.hjpnam.reviewboard.fixture.{ServiceStub, TestObject}
 import com.hjpnam.reviewboard.http.controller.util.BackendStub
 import com.hjpnam.reviewboard.http.request.{
   LoginRequest,
@@ -13,76 +13,34 @@ import com.hjpnam.reviewboard.service.{JWTService, UserService}
 import zio.test.*
 import zio.test.Assertion.*
 import sttp.client3.*
+import sttp.tapir.server.ServerEndpoint
 import zio.json.*
 import zio.{Scope, Task, ZIO, ZLayer}
 
-object UserControllerSpec extends ZIOSpecDefault, BackendStub:
-  private val testUser = User(
-    id = 1L,
-    email = "test@example.com",
-    hashedPassword = "test-password"
+object UserControllerSpec extends ZIOSpecDefault, BackendStub, TestObject, ServiceStub:
+  private val controllerBackendStubZIO: (
+      UserController => List[ServerEndpoint[Any, Task]]
+  ) => ZIO[JWTService & UserService, Nothing, SttpBackend[Task, Nothing]] = backendStubZIO(
+    UserController.makeZIO
   )
-  private val userServiceStub = ZLayer.succeed(new UserService {
-    override def registerUser(email: String, password: String): Task[User] = ZIO.succeed(testUser)
-
-    override def verifyPassword(email: String, password: String): Task[Boolean] =
-      ZIO.succeed(email == testUser.email)
-
-    override def updatePassword(
-        email: String,
-        oldPassword: String,
-        newPassword: String
-    ): Task[User] = ZIO.succeed(testUser.copy(email = email, hashedPassword = newPassword))
-
-    override def deleteUser(email: String, password: String): Task[User] = ZIO.succeed(testUser)
-
-    override def generateToken(email: String, password: String): Task[Option[UserToken]] = ZIO.when(
-      email == testUser.email && password == testUser.hashedPassword
-    )(ZIO.succeed(UserToken(testUser.email, "test-token", 3600L)))
-
-    override def recoverPassword(email: String, token: String, newPassword: String): Task[Boolean] =
-      ???
-
-    override def sendPasswordRecoveryToken(email: String): Task[Unit] = ???
-  })
-
-  private val jwtServiceStub = ZLayer.succeed(new JWTService {
-    override def createToken(user: User): Task[UserToken] = ???
-
-    override def verifyToken(token: String): Task[UserID] =
-      ZIO.cond(
-        token == "valid-token",
-        UserID(testUser.id, testUser.email),
-        JWTVerificationException("invalid token")
-      )
-  })
-
-  private val controllerBackendStubZIO = backendStubZIO(UserController.makeZIO)
 
   override def spec: Spec[TestEnvironment with Scope, Any] =
+    import com.hjpnam.reviewboard.util.RichSttpBackend.*
+
     suite("UserControllerSpec")(
       test("POST /user") {
-        val request = RegisterUserRequest(testUser.email, testUser.hashedPassword)
-
+        val request = RegisterUserRequest(testEmail, testUser.hashedPassword)
         for
           backendStub <- controllerBackendStubZIO(_.createUser :: Nil)
-          response <- basicRequest
-            .post(uri"/user")
-            .body(request.toJson)
-            .send(backendStub)
-        yield assert(response.body.flatMap(_.fromJson[UserResponse]))(
-          isRight(equalTo(UserResponse(testUser.email)))
-        )
+          response    <- backendStub.post[UserResponse]("user", request)
+        yield assert(response)(isRight(equalTo(UserResponse(testUser.email))))
       },
       test("POST /user/login") {
         val request = LoginRequest(testUser.email, testUser.hashedPassword)
         for
           backendStub <- controllerBackendStubZIO(_.login :: Nil)
-          response <- basicRequest
-            .post(uri"/user/login")
-            .body(request.toJson)
-            .send(backendStub)
-        yield assert(response.body.flatMap(_.fromJson[UserToken]))(
+          response    <- backendStub.post[UserToken]("/user/login", request)
+        yield assert(response)(
           isRight(equalTo(UserToken(testUser.email, "test-token", 3600L)))
         )
       },
@@ -90,25 +48,15 @@ object UserControllerSpec extends ZIOSpecDefault, BackendStub:
         val request = LoginRequest("foo@bar.com", "foobar")
         for
           backendStub <- controllerBackendStubZIO(_.login :: Nil)
-          response <- basicRequest
-            .post(uri"/user/login")
-            .body(request.toJson)
-            .send(backendStub)
-        yield assert(response.body)(isLeft(equalTo("failed to login")))
+          response    <- backendStub.post[UserToken]("/user/login", request)
+        yield assert(response)(isLeft(equalTo("failed to login")))
       },
       test("PUT /user/password") {
         val request = UpdatePasswordRequest(testUser.email, testUser.hashedPassword, "new-password")
         for
           backendStub <- controllerBackendStubZIO(_.updatePassword :: Nil)
-          response <- basicRequest
-            .put(uri"/user/password")
-            .body(request.toJson)
-            .auth
-            .bearer("valid-token")
-            .send(backendStub)
-        yield assert(response.body.flatMap(_.fromJson[UserResponse]))(
-          isRight(equalTo(UserResponse(testUser.email)))
-        )
+          response    <- backendStub.putAuth[UserResponse]("/user/password", request, testAuthToken)
+        yield assert(response)(isRight(equalTo(UserResponse(testUser.email))))
       },
       test("PUT /user/password without bearer token") {
         val request = UpdatePasswordRequest(testUser.email, testUser.hashedPassword, "new-password")
@@ -124,12 +72,7 @@ object UserControllerSpec extends ZIOSpecDefault, BackendStub:
         val request = UpdatePasswordRequest(testUser.email, testUser.hashedPassword, "new-password")
         for
           backendStub <- controllerBackendStubZIO(_.updatePassword :: Nil)
-          response <- basicRequest
-            .put(uri"/user/password")
-            .auth
-            .bearer("invalid-token")
-            .body(request.toJson)
-            .send(backendStub)
-        yield assert(response.body)(isLeft(equalTo("invalid token")))
+          response <- backendStub.putAuth[UserResponse]("/user/password", request, "invalid-token")
+        yield assert(response)(isLeft(equalTo("invalid token")))
       }
     ).provide(userServiceStub, jwtServiceStub)

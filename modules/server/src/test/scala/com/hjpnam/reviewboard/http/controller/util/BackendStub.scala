@@ -10,7 +10,7 @@ import zio.*
 trait BackendStub:
   def backendStubZIO[R, E, A](
       controllerZIO: ZIO[R, E, A]
-  )(endpointFn: A => List[ServerEndpoint[Any, Task]]): ZIO[R, E, SttpBackend[Task, Any]] = for
+  )(endpointFn: A => List[ServerEndpoint[Any, Task]]): ZIO[R, E, SttpBackend[Task, Nothing]] = for
     controller <- controllerZIO
     backendStub <- ZIO.succeed(
       TapirStubInterpreter(SttpBackendStub(new RIOMonadError[Any]))

@@ -25,7 +25,7 @@ class ReviewRepositoryLive(quill: Quill.Postgres[SnakeCase.type]) extends Review
 
   inline given schema: SchemaMeta[Review]  = schemaMeta[Review]("review")
   inline given insMeta: InsertMeta[Review] = insertMeta[Review](_.id, _.created, _.updated)
-  inline given updMeta: UpdateMeta[Review] = updateMeta[Review](_.id, _.created)
+  inline given updMeta: UpdateMeta[Review] = updateMeta[Review](_.id, _.userId, _.created)
 
   override def create(review: Review): Task[Review] = run(
     query[Review]

@@ -28,17 +28,17 @@ class UserController private (userService: UserService, jwtService: JWTService)
   )
 
   val updatePassword = updatePasswordEndpoint
-    .serverLogic[Any] { _ => req =>
+    .serverLogic[Any] { userId => req =>
       userService
-        .updatePassword(req.email, req.oldPassword, req.newPassword)
+        .updatePassword(userId.email, req.oldPassword, req.newPassword)
         .map(user => UserResponse(user.email))
         .mapToHttpError
     }
 
   val deleteUser = deleteUserEndpoint
-    .serverLogic[Any] { _ => req =>
+    .serverLogic[Any] { userId => req =>
       userService
-        .deleteUser(req.email, req.password)
+        .deleteUser(userId.email, req.password)
         .map(user => UserResponse(user.email))
         .mapToHttpError
     }

@@ -8,7 +8,7 @@ import zio.*
 import java.time.Instant
 
 trait ReviewService:
-  def create(createRequest: CreateReviewRequest): Task[Review]
+  def create(createRequest: CreateReviewRequest, userId: Long): Task[Review]
   def update(id: Long, updateRequest: CreateReviewRequest): Task[Review]
   def delete(id: Long): Task[Review]
   def getById(id: Long): Task[Option[Review]]
@@ -23,11 +23,11 @@ object ReviewService:
   }
 
 class ReviewServiceLive(repository: ReviewRepository) extends ReviewService:
-  override def create(createRequest: CreateReviewRequest): Task[Review] =
-    repository.create(createRequest.toReview(-1L, Instant.now()))
+  override def create(createRequest: CreateReviewRequest, userId: Long): Task[Review] =
+    repository.create(createRequest.toReview(-1L, userId, Instant.now()))
 
   override def update(id: Long, updateRequest: CreateReviewRequest): Task[Review] =
-    repository.update(id, _ => updateRequest.toReview(id, Instant.now()))
+    repository.update(id, _ => updateRequest.toReview(id, -1L, Instant.now()))
 
   override def delete(id: Long): Task[Review] = repository.delete(id)
 

@@ -1,19 +1,13 @@
 package com.hjpnam.reviewboard.fixture
 
-import com.hjpnam.reviewboard.domain.data.User
-import com.hjpnam.reviewboard.repository.UserRepository
-import zio.{Task, ZIO, ZLayer}
+import com.hjpnam.reviewboard.domain.data.{Review, User}
+import com.hjpnam.reviewboard.repository.{ReviewRepository, UserRepository}
+import zio.{Task, ULayer, ZIO, ZLayer}
 
 import scala.collection.mutable
 
 trait RepoStub:
-  val testEmail = "test@email.com"
-  val testUser = User(
-    1L,
-    testEmail,
-    "1000:da70ffa630dc4793f0e4a64a8ca1aa1ae5892a29da5ce97d:2d1538385faf4154231d6fae95e09306efd841b32e9eb0bc"
-  )
-
+  this: TestObject =>
   val stubUserRepoLayer = ZLayer.succeed(
     new UserRepository:
       val db = mutable.Map(1L -> testUser)
@@ -39,3 +33,43 @@ trait RepoStub:
         user
       }
   )
+
+  val reviewRepositoryStub: ULayer[ReviewRepository] = ZLayer.succeed(new ReviewRepository {
+    var db = Map.empty[Long, Review]
+
+    override def create(review: Review): Task[Review] = ZIO.attempt {
+      val newKey    = db.keys.maxOption.fold(1L)(_ + 1)
+      val newReview = review.copy(id = newKey)
+      db = db + (newKey -> newReview)
+      newReview
+    }
+
+    override def update(id: Long, op: Review => Review): Task[Review] = ZIO.attempt {
+      val review  = db(id)
+      val updated = op(review)
+      db = db.updated(id, updated)
+      updated
+    }
+
+    override def delete(id: Long): Task[Review] = ZIO.attempt {
+      val deleted = db(id)
+      db = db - id
+      deleted
+    }
+
+    override def getById(id: Long): Task[Option[Review]] = ZIO.attempt {
+      db.get(id)
+    }
+
+    override def getByUserId(userId: Long): Task[List[Review]] = ZIO.attempt {
+      db.values.filter(_.userId == userId).toList
+    }
+
+    override def getByCompanyId(companyId: Long): Task[List[Review]] = ZIO.attempt {
+      db.values.filter(_.companyId == companyId).toList
+    }
+
+    override def get: Task[List[Review]] = ZIO.attempt {
+      db.values.toList
+    }
+  })

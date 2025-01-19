@@ -1,13 +1,13 @@
 package com.hjpnam.reviewboard.repository
 
 import com.hjpnam.reviewboard.config.RecoveryTokenConfig
-import com.hjpnam.reviewboard.fixture.RepoStub
+import com.hjpnam.reviewboard.fixture.{RepoStub, TestObject}
 import com.hjpnam.reviewboard.repository.CompanyRepositorySpec.dataSourceLayer
 import zio.test.*
 import zio.{Scope, ZIO, ZLayer}
 import zio.test.Assertion.*
 
-object RecoveryTokenRepositorySpec extends ZIOSpecDefault, RepositorySpec, RepoStub:
+object RecoveryTokenRepositorySpec extends ZIOSpecDefault, RepositorySpec, TestObject, RepoStub:
   override val initScriptPath = "sql/recovery-token.sql"
 
   override def spec: Spec[TestEnvironment with Scope, Any] =

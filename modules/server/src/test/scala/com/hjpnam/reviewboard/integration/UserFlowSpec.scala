@@ -1,16 +1,9 @@
 package com.hjpnam.reviewboard.integration
 
-import com.hjpnam.reviewboard.config.{EmailConfig, JWTConfig, RecoveryTokenConfig}
+import com.hjpnam.reviewboard.config.{JWTConfig, RecoveryTokenConfig}
 import com.hjpnam.reviewboard.domain.data.UserToken
 import com.hjpnam.reviewboard.http.controller.*
-import com.hjpnam.reviewboard.http.request.{
-  DeleteUserRequest,
-  ForgotPasswordRequest,
-  LoginRequest,
-  RecoverPasswordRequest,
-  RegisterUserRequest,
-  UpdatePasswordRequest
-}
+import com.hjpnam.reviewboard.http.request.*
 import com.hjpnam.reviewboard.http.response.UserResponse
 import com.hjpnam.reviewboard.repository.{
   RecoveryTokenRepository,
@@ -43,60 +36,6 @@ object UserFlowSpec extends ZIOSpecDefault, RepositorySpec:
     )
   yield backendStub
 
-  extension [RequestPayload: JsonCodec](backend: SttpBackend[Task, Nothing])
-    def sendRequest[ResponsePayload: JsonCodec](
-        method: Method,
-        path: String,
-        payload: RequestPayload,
-        token: String = ""
-    ): Task[Either[String, ResponsePayload]] =
-      basicRequest
-        .method(method, uri"$path")
-        .body(payload.toJson)
-        .auth
-        .bearer(token)
-        .send(backend)
-        .map(_.body.flatMap(_.fromJson[ResponsePayload]))
-
-    def post[ResponsePayload: JsonCodec](
-        path: String,
-        payload: RequestPayload
-    ): Task[Either[String, ResponsePayload]] =
-      sendRequest(Method.POST, path, payload)
-
-    def postNoResponse(path: String, payload: RequestPayload): Task[Unit] =
-      basicRequest
-        .method(Method.POST, uri"$path")
-        .body(payload.toJson)
-        .send(backend)
-        .unit
-
-    def put[ResponsePayload: JsonCodec](
-        path: String,
-        payload: RequestPayload
-    ): Task[Either[String, ResponsePayload]] =
-      sendRequest(Method.PUT, path, payload)
-
-    def putAuth[ResponsePayload: JsonCodec](
-        path: String,
-        payload: RequestPayload,
-        token: String
-    ): Task[Either[String, ResponsePayload]] =
-      sendRequest(Method.PUT, path, payload, token)
-
-    def delete[ResponsePayload: JsonCodec](
-        path: String,
-        payload: RequestPayload
-    ): Task[Either[String, ResponsePayload]] =
-      sendRequest(Method.DELETE, path, payload)
-
-    def deleteAuth[ResponsePayload: JsonCodec](
-        path: String,
-        payload: RequestPayload,
-        token: String
-    ): Task[Either[String, ResponsePayload]] =
-      sendRequest(Method.DELETE, path, payload, token)
-
   class EmailServiceProbe extends EmailService:
     val db = mutable.Map.empty[String, String]
     override def sendPasswordRecoveryEmail(to: String, token: String): Task[Unit] =
@@ -105,8 +44,10 @@ object UserFlowSpec extends ZIOSpecDefault, RepositorySpec:
     def probeToken(email: String): UIO[Option[String]] = ZIO.succeed(db.get(email))
 
   override def spec: Spec[TestEnvironment with Scope, Any] =
+    import com.hjpnam.reviewboard.util.RichSttpBackend.*
     val testEmail    = "test@example.com"
     val testPassword = "test-password"
+
     suite("UserFlowSpec")(
       test("create user") {
         for
