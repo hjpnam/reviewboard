@@ -45,3 +45,15 @@ build/
 
 ### Scala ###
 .bsp/
+
+project/project/
+project/target/
+.metals/
+.scala-build/
+project/metals.sbt
+
+logs
+*.log
+npm-debug.log*
+node_modules/
+

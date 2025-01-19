@@ -1,0 +1,16 @@
+{
+  "scripts": {
+    "start": "vite --force -l info",
+    "build-staging": "vite build build/index.html --outDir dist-staging",
+    "build-prod": "vite build build/index.html --outDir dist-prod"
+  },
+  "devDependencies": {
+    "vite": "^6.0.7",
+    "process": "^0.11.10",
+    "sass": "^1.34.0"
+  },
+  "dependencies": {
+    "moment": "^2.29.4",
+    "showdown": "^2.1.0"
+  }
+}
