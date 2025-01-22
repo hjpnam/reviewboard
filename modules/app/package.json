@@ -5,9 +5,10 @@
     "build-prod": "vite build build/index.html --outDir dist-prod"
   },
   "devDependencies": {
-    "vite": "^6.0.7",
+    "@scala-js/vite-plugin-scalajs": "^1.0.0",
     "process": "^0.11.10",
-    "sass": "^1.34.0"
+    "sass": "^1.34.0",
+    "vite": "^6.0.7"
   },
   "dependencies": {
     "moment": "^2.29.4",

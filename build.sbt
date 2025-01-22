@@ -1,3 +1,5 @@
+import org.scalajs.linker.interface.ModuleSplitStyle
+
 ThisBuild / scalaVersion := "3.3.1"
 ThisBuild / version      := "0.1.0-SNAPSHOT"
 ThisBuild / scalacOptions ++= Seq(
@@ -81,7 +83,7 @@ lazy val app = (project in file("modules/app"))
       "dev.zio"                       %%% "zio-json"          % "0.7.4",
       "io.frontroute"                 %%% "frontroute"        % "0.19.0" // Brings in Laminar 17
     ),
-    scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.CommonJSModule) },
+    scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.ESModule).withModuleSplitStyle(ModuleSplitStyle.SmallModulesFor(List("app"))) },
     semanticdbEnabled               := true,
     autoAPIMappings                 := true,
     scalaJSUseMainModuleInitializer := true,
