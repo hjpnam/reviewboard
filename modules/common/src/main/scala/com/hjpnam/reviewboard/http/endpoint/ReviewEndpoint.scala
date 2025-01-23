@@ -1,20 +1,22 @@
 package com.hjpnam.reviewboard.http.endpoint
 
 import com.hjpnam.reviewboard.domain.data.Review
+import com.hjpnam.reviewboard.domain.error.HttpError
 import com.hjpnam.reviewboard.http.request.CreateReviewRequest
 import sttp.tapir.*
 import sttp.tapir.generic.auto.given
 import sttp.tapir.json.zio.jsonBody
 
-trait ReviewEndpoint extends BaseEndpoint, SecureBaseEndpoint:
-  val createEndpoint = secureBaseEndpoint
-    .tag("review")
-    .name("create")
-    .description("create a review for a company")
-    .in("review")
-    .post
-    .in(jsonBody[CreateReviewRequest])
-    .out(jsonBody[Review])
+trait ReviewEndpoint extends BaseEndpoint:
+  val createEndpoint: Endpoint[String, CreateReviewRequest, HttpError, Review, Any] =
+    secureBaseEndpoint
+      .tag("review")
+      .name("create")
+      .description("create a review for a company")
+      .in("review")
+      .post
+      .in(jsonBody[CreateReviewRequest])
+      .out(jsonBody[Review])
 
   val getAllEndpoint = secureBaseEndpoint
     .tag("review")

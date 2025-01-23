@@ -1,6 +1,6 @@
 package com.hjpnam.reviewboard.http.endpoint
 
-import sttp.tapir.ztapir.*
+import sttp.tapir.*
 
 trait HealthEndpoint:
   val healthCheck = endpoint

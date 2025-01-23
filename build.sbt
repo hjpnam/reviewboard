@@ -51,7 +51,6 @@ val serverDependencies = commonDependencies ++ Seq(
   "com.auth0"              % "java-jwt"                          % "4.4.0",
   "com.sun.mail"           % "javax.mail"                        % javaMailVersion,
   "com.stripe"             % "stripe-java"                       % stripeVersion,
-  "io.github.arainko"     %% "ducktape"                          % "0.2.7",
   "org.typelevel"         %% "cats-core"                         % catsVersion,
   "org.eclipse.angus"      % "angus-mail"                        % "2.0.3"
 )
@@ -60,7 +59,8 @@ lazy val common = crossProject(JVMPlatform, JSPlatform)
   .crossType(CrossType.Pure)
   .in(file("modules/common"))
   .settings(
-    libraryDependencies ++= commonDependencies
+    libraryDependencies ++= commonDependencies,
+    libraryDependencies += "io.github.arainko" %%% "ducktape" % "0.2.7"
   )
   .jsSettings(
     libraryDependencies ++= Seq(
@@ -83,7 +83,10 @@ lazy val app = (project in file("modules/app"))
       "dev.zio"                       %%% "zio-json"          % "0.7.4",
       "io.frontroute"                 %%% "frontroute"        % "0.19.0" // Brings in Laminar 17
     ),
-    scalaJSLinkerConfig ~= { _.withModuleKind(ModuleKind.ESModule).withModuleSplitStyle(ModuleSplitStyle.SmallModulesFor(List("app"))) },
+    scalaJSLinkerConfig ~= {
+      _.withModuleKind(ModuleKind.ESModule)
+        .withModuleSplitStyle(ModuleSplitStyle.SmallModulesFor(List("app")))
+    },
     semanticdbEnabled               := true,
     autoAPIMappings                 := true,
     scalaJSUseMainModuleInitializer := true,

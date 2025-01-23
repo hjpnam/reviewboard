@@ -38,6 +38,7 @@ class UserServiceLive(
 ) extends UserService:
   import UserServiceLive.Hasher.*
 
+  // todo: convert db errors to business exceptions
   override def registerUser(email: String, password: String): Task[User] =
     userRepo.create(User(id = -1L, email, hashedPassword = generateHash(password)))
 

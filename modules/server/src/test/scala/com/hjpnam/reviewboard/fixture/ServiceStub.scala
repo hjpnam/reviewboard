@@ -1,7 +1,7 @@
 package com.hjpnam.reviewboard.fixture
 
-import com.auth0.jwt.exceptions.JWTVerificationException
 import com.hjpnam.reviewboard.domain.data.{Review, User, UserID, UserToken}
+import com.hjpnam.reviewboard.domain.error.Unauthorized
 import com.hjpnam.reviewboard.http.request.CreateReviewRequest
 import com.hjpnam.reviewboard.service.{JWTService, ReviewService, UserService}
 import zio.{Task, ZIO, ZLayer}
@@ -42,7 +42,7 @@ trait ServiceStub:
       ZIO.cond(
         token == testAuthToken,
         UserID(testUser.id, testUser.email),
-        JWTVerificationException("invalid token")
+        Unauthorized("invalid token")
       )
   })
 

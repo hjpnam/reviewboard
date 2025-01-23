@@ -3,11 +3,11 @@ package com.hjpnam.reviewboard.http.endpoint
 import com.hjpnam.reviewboard.domain.data.UserToken
 import com.hjpnam.reviewboard.http.request.*
 import com.hjpnam.reviewboard.http.response.UserResponse
+import sttp.tapir.*
 import sttp.tapir.generic.auto.*
 import sttp.tapir.json.zio.jsonBody
-import sttp.tapir.ztapir.*
 
-trait UserEndpoint extends BaseEndpoint, SecureBaseEndpoint:
+trait UserEndpoint extends BaseEndpoint:
   val createUserEndpoint =
     baseEndpoint
       .tag("user")

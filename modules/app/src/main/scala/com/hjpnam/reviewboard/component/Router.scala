@@ -2,7 +2,6 @@ package com.hjpnam.reviewboard.component
 
 import com.hjpnam.reviewboard.page.*
 import com.raquo.laminar.api.L.{*, given}
-import org.scalajs.dom
 import frontroute.{path, *}
 
 object Router:

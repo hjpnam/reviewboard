@@ -2,7 +2,7 @@ package com.hjpnam.reviewboard.service
 
 import com.hjpnam.reviewboard.config.{Configs, EmailConfig}
 import jakarta.mail.internet.MimeMessage
-import jakarta.mail.{Authenticator, Message, PasswordAuthentication, Session, Transport}
+import jakarta.mail.*
 import zio.*
 
 import java.util.Properties

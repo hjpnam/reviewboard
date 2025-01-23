@@ -3,9 +3,11 @@ package com.hjpnam.reviewboard.service
 import com.auth0.jwt.JWT
 import com.auth0.jwt.JWTVerifier.BaseVerification
 import com.auth0.jwt.algorithms.Algorithm
+import com.auth0.jwt.exceptions.JWTVerificationException
 import com.auth0.jwt.interfaces.JWTVerifier
 import com.hjpnam.reviewboard.config.{Configs, JWTConfig}
 import com.hjpnam.reviewboard.domain.data.{User, UserID, UserToken}
+import com.hjpnam.reviewboard.domain.error.Unauthorized
 import zio.{Clock, Task, TaskLayer, URLayer, ZIO, ZLayer}
 
 trait JWTService:
@@ -49,7 +51,11 @@ class JWTServiceLive(jwtConfig: JWTConfig, clock: java.time.Clock) extends JWTSe
   yield UserToken(user.email, token, expiration.getEpochSecond)
 
   override def verifyToken(token: String): Task[UserID] = for
-    decoded <- ZIO.attempt(verifier.verify(token))
+    decoded <- ZIO
+      .attempt(verifier.verify(token))
+      .catchSome { case _: JWTVerificationException =>
+        ZIO.fail(Unauthorized("failed to verify token"))
+      }
     userId <- ZIO.attempt(
       UserID(
         id = decoded.getSubject.toLong,

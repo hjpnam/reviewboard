@@ -1,7 +1,8 @@
 package com.hjpnam.reviewboard.http.controller
 
 import com.hjpnam.reviewboard.domain.error.Unauthorized
-import com.hjpnam.reviewboard.http.endpoint.{SecureBaseEndpoint, UserEndpoint}
+import com.hjpnam.reviewboard.http.Authenticator
+import com.hjpnam.reviewboard.http.endpoint.UserEndpoint
 import com.hjpnam.reviewboard.http.request.RecoverPasswordRequest
 import com.hjpnam.reviewboard.http.response.UserResponse
 import com.hjpnam.reviewboard.http.syntax.*
@@ -9,10 +10,11 @@ import com.hjpnam.reviewboard.service.{JWTService, UserService}
 import sttp.tapir.ztapir.*
 import zio.ZIO
 
-class UserController private (userService: UserService, jwtService: JWTService)
+class UserController private (userService: UserService, val jwtService: JWTService)
     extends BaseController,
       UserEndpoint,
-      SecureBaseEndpoint(jwtService):
+      Authenticator:
+
   val createUser = createUserEndpoint.zServerLogic[Any](req =>
     userService
       .registerUser(req.email, req.password)
@@ -27,7 +29,7 @@ class UserController private (userService: UserService, jwtService: JWTService)
       .mapToHttpError
   )
 
-  val updatePassword = updatePasswordEndpoint
+  val updatePassword = updatePasswordEndpoint.authenticate
     .serverLogic[Any] { userId => req =>
       userService
         .updatePassword(userId.email, req.oldPassword, req.newPassword)
@@ -35,7 +37,7 @@ class UserController private (userService: UserService, jwtService: JWTService)
         .mapToHttpError
     }
 
-  val deleteUser = deleteUserEndpoint
+  val deleteUser = deleteUserEndpoint.authenticate
     .serverLogic[Any] { userId => req =>
       userService
         .deleteUser(userId.email, req.password)
