@@ -1,5 +1,6 @@
 package com.hjpnam.reviewboard.component
 
+import com.hjpnam.reviewboard.common.Constant
 import com.raquo.laminar.api.L.{*, given}
 import com.raquo.laminar.codecs.*
 
@@ -43,17 +44,13 @@ object Header:
       )
     )
 
-  @js.native
-  @JSImport("/static/img/fiery-lava 128x128.png", JSImport.Default)
-  private val logoImage: String = js.native
-
   private def renderLogo() =
     a(
       href := "/",
       cls  := "navbar-brand",
       img(
         cls := "home-logo",
-        src := logoImage,
+        src := Constant.logoImage,
         alt := "Rock the JVM"
       )
     )

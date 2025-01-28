@@ -3,7 +3,8 @@ package com.hjpnam.reviewboard
 import com.hjpnam.reviewboard.http.HttpApi
 import com.hjpnam.reviewboard.repository.*
 import com.hjpnam.reviewboard.service.*
-import sttp.tapir.server.ziohttp.ZioHttpInterpreter
+import sttp.tapir.server.interceptor.cors.CORSInterceptor
+import sttp.tapir.server.ziohttp.{ZioHttpInterpreter, ZioHttpServerOptions}
 import zio.*
 import zio.http.Server
 
@@ -12,7 +13,7 @@ object Application extends ZIOAppDefault:
   val serverProgram =
     for
       endpoints <- HttpApi.endpointsZIO
-      _         <- Server.serve(ZioHttpInterpreter().toHttp(endpoints))
+      _         <- Server.serve(ZioHttpInterpreter(ZioHttpServerOptions.default.appendInterceptor(CORSInterceptor.default)).toHttp(endpoints))
       _         <- Console.printLine("server running")
     yield ()
 
