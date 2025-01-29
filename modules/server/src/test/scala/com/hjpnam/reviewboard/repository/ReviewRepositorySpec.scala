@@ -2,13 +2,13 @@ package com.hjpnam.reviewboard.repository
 
 import com.hjpnam.reviewboard.domain.data.Review
 import com.hjpnam.reviewboard.syntax.*
-import com.hjpnam.reviewboard.util.Gen
+import com.hjpnam.reviewboard.util.TestGen
 import zio.*
 import zio.test.*
 
 import java.time.Instant
 
-object ReviewRepositorySpec extends ZIOSpecDefault, RepositorySpec, Gen:
+object ReviewRepositorySpec extends ZIOSpecDefault, RepositorySpec, TestGen:
   private val testInstant = Instant.now()
 
   private val testReview = Review(

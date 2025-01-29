@@ -40,7 +40,10 @@ class BackendClientLive private (
     backend.send(endpointRequest(endpoint)(payload)).map(_.body).absolve
 
 object BackendClientLive:
-  private type ZioWebSocketsStreams = ZioStreams & WebSockets
+  // need a type alias to appease implicit resolution of izumi tag
+  // won't compile if alias is private for some reason.
+  // https://github.com/softwaremill/sttp/issues/2368
+  protected type ZioWebSocketsStreams = ZioStreams & WebSockets
 
   val layer: ZLayer[
     BackendClientConfig & SttpClientInterpreter & SttpBackend[Task, ZioWebSocketsStreams],

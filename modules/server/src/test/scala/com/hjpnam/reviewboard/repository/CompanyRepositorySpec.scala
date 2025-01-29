@@ -1,18 +1,18 @@
 package com.hjpnam.reviewboard.repository
 
-import com.hjpnam.reviewboard.domain.data.Company
-import com.hjpnam.reviewboard.syntax.*
-import com.hjpnam.reviewboard.util.Gen
+import com.hjpnam.reviewboard.domain.data.{Company, CompanyFilter}
+import com.hjpnam.reviewboard.util.TestGen
 import org.postgresql.ds.PGSimpleDataSource
 import zio.*
 import zio.test.*
+import zio.test.Assertion.*
 
 import java.sql.SQLException
 
-object CompanyRepositorySpec extends ZIOSpecDefault, RepositorySpec, Gen:
+object CompanyRepositorySpec extends ZIOSpecDefault, RepositorySpec, TestGen:
   private val fooCompany = Company(1L, "foo", "foo", "foo.com")
 
-  private def genCompany(): Company =
+  private def testCompany(): Company =
     Company(
       id = -1L,
       slug = genString(8),
@@ -25,72 +25,74 @@ object CompanyRepositorySpec extends ZIOSpecDefault, RepositorySpec, Gen:
   override def spec: Spec[TestEnvironment & Scope, Any] =
     suite("CompanyRepositorySpec")(
       test("create a company") {
-        val program = for
+        for
           repo    <- ZIO.service[CompanyRepository]
           company <- repo.create(fooCompany)
-        yield company
-
-        program.assert {
-          case Company(_, "foo", "foo", "foo.com", _, _, _, _, _) => true
-          case _                                                  => false
-        }
+        yield assert(company)(hasField("slug", _.slug, equalTo("foo")))
+          && assert(company)(hasField("name", _.name, equalTo("foo")))
+          && assert(company)(hasField("url", _.url, equalTo("foo.com")))
       },
       test("creating a duplicate should error") {
-        val program = for
+        for
           repo <- ZIO.service[CompanyRepository]
           _    <- repo.create(fooCompany)
-          err  <- repo.create(fooCompany).flip
-        yield err
-
-        program.assert(_.isInstanceOf[SQLException])
+          err  <- repo.create(fooCompany).exit
+        yield assert(err)(failsWithA[SQLException])
       },
       test("get by id and slug") {
-        val program = for
+        for
           repo          <- ZIO.service[CompanyRepository]
           company       <- repo.create(fooCompany)
           fetchedById   <- repo.getById(company.id)
           fetchedBySlug <- repo.getBySlug(company.slug)
-        yield (company, fetchedById, fetchedBySlug)
-
-        program.assert {
-          case (company, Some(fetchedById), Some(fetchedBySlug)) =>
-            company == fetchedById && company == fetchedBySlug
-          case _ => false
-        }
+        yield assert(fetchedById)(isSome(equalTo(company)))
+          && assert(fetchedBySlug)(isSome(equalTo(company)))
       },
       test("update record") {
-        val program = for
+        for
           repo        <- ZIO.service[CompanyRepository]
           company     <- repo.create(fooCompany)
           updated     <- repo.update(company.id, _.copy(url = "foo.org"))
           fetchedById <- repo.getById(company.id)
-        yield updated -> fetchedById
-
-        program.assert {
-          case (updated, Some(fetchedById)) =>
-            fetchedById == updated
-          case _ => false
-        }
+        yield assert(fetchedById)(isSome(equalTo(updated)))
       },
       test("delete record") {
-        val program = for
+        for
           repo        <- ZIO.service[CompanyRepository]
           company     <- repo.create(fooCompany)
           _           <- repo.delete(company.id)
           fetchedById <- repo.getById(company.id)
-        yield fetchedById
-
-        program.assert(_.isEmpty)
+        yield assert(fetchedById)(isNone)
       },
       test("get all records") {
-        val program = for
+        for
           repo             <- ZIO.service[CompanyRepository]
-          companies        <- ZIO.foreach(1 to 10)(_ => repo.create(genCompany()))
+          companies        <- ZIO.foreach(1 to 10)(_ => repo.create(testCompany()))
           companiesFetched <- repo.get
-        yield companies -> companiesFetched
+        yield assert(companies)(hasSameElements(companiesFetched))
+      },
+      test("get all filters") {
+        val company1 = testCompany().copy(industry = Some(genString(8)), location = Some(genString(8)), country = Some(genString(8)), tags = genString(8) :: genString(8) :: Nil)
+        val company2 = company1.copy(slug = company1.slug.drop(1), name = company1.name.drop(1), url = company1.url.drop(1))
+        val company3 = testCompany().copy(industry = None, location = Some(genString(8)), country = Some(genString(8)), tags = Nil)
+        val companies          = company1 :: company2 :: company3 :: Nil
+        val expectedLocations  = companies.flatMap(_.location.toList)
+        val expectedCountries  = companies.flatMap(_.country.toList)
+        val expectedIndustries = companies.flatMap(_.industry.toList)
+        val expectedTags       = companies.flatMap(_.tags)
 
-        program.map { case (companies, companiesFetched) =>
-          zio.test.assert(companies)(Assertion.hasSameElements(companiesFetched))
-        }
+        for
+          repo    <- ZIO.service[CompanyRepository]
+          _       <- ZIO.foreachDiscard(companies)(repo.create)
+          filters <- repo.uniqueAttributes
+        yield assert(filters)(
+          hasField("locations", _.locations, hasSameElementsDistinct(expectedLocations))
+        ) && assert(filters)(
+          hasField("countries", _.countries, hasSameElementsDistinct(expectedCountries))
+        ) && assert(filters)(
+          hasField("industries", _.industries, hasSameElementsDistinct(expectedIndustries))
+        ) && assert(filters)(
+          hasField("tags", _.tags, hasSameElementsDistinct(expectedTags))
+        )
       }
     ).provide(CompanyRepository.live, dataSourceLayer, Repository.quillLayer, Scope.default)

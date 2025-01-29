@@ -1,20 +1,18 @@
 package com.hjpnam.reviewboard.service
 
-import com.hjpnam.reviewboard.domain.data.Company
+import com.hjpnam.reviewboard.domain.data.{Company, CompanyFilter}
 import com.hjpnam.reviewboard.http.request.CreateCompanyRequest
 import com.hjpnam.reviewboard.repository.CompanyRepository
-import zio.{Task, ULayer, URLayer, ZIO, ZLayer}
-
-import scala.collection.mutable
+import zio.{Task, URLayer, ZIO, ZLayer}
 
 trait CompanyService:
   def create(createRequest: CreateCompanyRequest): Task[Company]
   def getAll: Task[List[Company]]
   def getById(id: Long): Task[Option[Company]]
   def getBySlug(slug: String): Task[Option[Company]]
+  def allFilters: Task[CompanyFilter]
 
 object CompanyService:
-  val dummyLayer: ULayer[CompanyServiceDummy] = ZLayer.succeed(new CompanyServiceDummy)
   val live: URLayer[CompanyRepository, CompanyServiceLive] = ZLayer {
     for repository <- ZIO.service[CompanyRepository]
     yield new CompanyServiceLive(repository)
@@ -33,23 +31,4 @@ class CompanyServiceLive(companyRepository: CompanyRepository) extends CompanySe
   override def getBySlug(slug: String): Task[Option[Company]] =
     companyRepository.getBySlug(slug)
 
-class CompanyServiceDummy extends CompanyService:
-  val db = mutable.Map.empty[Long, Company]
-
-  override def create(createRequest: CreateCompanyRequest): Task[Company] =
-    ZIO.succeed {
-      val newId      = if db.keys.isEmpty then 1 else db.keys.max + 1
-      val newCompany = createRequest.toCompany(newId)
-      db += newId -> newCompany
-      newCompany
-    }
-
-  override def getAll: Task[List[Company]] = ZIO.succeed(db.values.toList)
-
-  override def getById(id: Long): Task[Option[Company]] = ZIO.succeed {
-    db.get(id)
-  }
-
-  override def getBySlug(slug: String): Task[Option[Company]] = ZIO.succeed {
-    db.values.find(_.slug == slug)
-  }
+  override def allFilters: Task[CompanyFilter] = companyRepository.uniqueAttributes

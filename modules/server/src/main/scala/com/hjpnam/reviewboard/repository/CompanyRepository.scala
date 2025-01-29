@@ -1,6 +1,6 @@
 package com.hjpnam.reviewboard.repository
 
-import com.hjpnam.reviewboard.domain.data.Company
+import com.hjpnam.reviewboard.domain.data.{Company, CompanyFilter}
 import com.hjpnam.reviewboard.domain.error.ObjectNotFound
 import io.getquill.*
 import io.getquill.jdbczio.Quill
@@ -13,6 +13,7 @@ trait CompanyRepository:
   def getById(id: Long): Task[Option[Company]]
   def getBySlug(slug: String): Task[Option[Company]]
   def get: Task[List[Company]]
+  def uniqueAttributes: Task[CompanyFilter]
 
 object CompanyRepository:
   val live: URLayer[Quill.Postgres[SnakeCase.type], CompanyRepositoryLive] = ZLayer {
@@ -60,3 +61,11 @@ class CompanyRepositoryLive(quill: Quill.Postgres[SnakeCase.type]) extends Compa
   }.map(_.headOption)
 
   override def get: Task[List[Company]] = run(query[Company])
+
+  override def uniqueAttributes: Task[CompanyFilter] =
+    for
+      locations  <- run(query[Company].map(_.location).distinct).map(_.flatMap(_.toList))
+      countries  <- run(query[Company].map(_.country).distinct).map(_.flatMap(_.toList))
+      industries <- run(query[Company].map(_.industry).distinct).map(_.flatMap(_.toList))
+      tags       <- run(query[Company].map(_.tags).distinct).map(_.flatten.distinct)
+    yield CompanyFilter(locations, countries, industries, tags)

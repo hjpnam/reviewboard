@@ -2,12 +2,12 @@ package com.hjpnam.reviewboard.service
 
 import com.hjpnam.reviewboard.config.JWTConfig
 import com.hjpnam.reviewboard.domain.data.User
-import com.hjpnam.reviewboard.util.Gen
+import com.hjpnam.reviewboard.util.TestGen
 import zio.test.*
 import zio.test.Assertion.*
 import zio.{Scope, ZIO, ZLayer}
 
-object JWTServiceSpec extends ZIOSpecDefault with Gen:
+object JWTServiceSpec extends ZIOSpecDefault with TestGen:
   private def genUser: User =
     User(
       id = genLong(),

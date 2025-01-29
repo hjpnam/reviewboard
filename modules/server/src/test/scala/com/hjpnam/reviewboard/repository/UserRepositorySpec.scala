@@ -2,11 +2,11 @@ package com.hjpnam.reviewboard.repository
 
 import com.hjpnam.reviewboard.domain.data.User
 import com.hjpnam.reviewboard.syntax.*
-import com.hjpnam.reviewboard.util.Gen
+import com.hjpnam.reviewboard.util.TestGen
 import zio.*
 import zio.test.*
 
-object UserRepositorySpec extends ZIOSpecDefault, RepositorySpec, Gen:
+object UserRepositorySpec extends ZIOSpecDefault, RepositorySpec, TestGen:
   override val initScriptPath = "sql/user.sql"
 
   private def genUser: User =

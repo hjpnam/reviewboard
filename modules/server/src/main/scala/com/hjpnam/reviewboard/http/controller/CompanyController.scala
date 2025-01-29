@@ -26,7 +26,12 @@ class CompanyController private (companyService: CompanyService)
       .mapToHttpError
   }
 
-  override val routes: List[ZServerEndpoint[Any, Any]] = create :: getAll :: getById :: Nil
+  val allFilters = allFiltersEndpoint.zServerLogic[Any] { _ =>
+    companyService.allFilters.mapToHttpError
+  }
+
+  override val routes: List[ZServerEndpoint[Any, Any]] =
+    create :: getAll :: getById :: allFilters :: Nil
 
 object CompanyController:
   val makeZIO: URIO[CompanyService, CompanyController] =

@@ -1,6 +1,6 @@
 package com.hjpnam.reviewboard.service
 
-import com.hjpnam.reviewboard.domain.data.Company
+import com.hjpnam.reviewboard.domain.data.{Company, CompanyFilter}
 import com.hjpnam.reviewboard.http.request.CreateCompanyRequest
 import com.hjpnam.reviewboard.repository.CompanyRepository
 import com.hjpnam.reviewboard.syntax.*
@@ -41,6 +41,8 @@ object CompanyServiceSpec extends ZIOSpecDefault:
         ZIO.succeed(db.values.find(_.slug == slug))
 
       override def get: Task[List[Company]] = ZIO.succeed(db.values.toList)
+
+      override def uniqueAttributes: Task[CompanyFilter] = ???
     }
   )
 

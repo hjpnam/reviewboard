@@ -1,13 +1,10 @@
 package com.hjpnam.reviewboard.page
 
 import com.hjpnam.reviewboard.common.Constant
-import com.hjpnam.reviewboard.component.Anchor
+import com.hjpnam.reviewboard.component.{Anchor, FilterPanel}
 import com.hjpnam.reviewboard.core.BackendClient
 import com.hjpnam.reviewboard.domain.data.Company
 import com.raquo.laminar.api.L.{*, given}
-import sttp.client3.impl.zio.FetchZioBackend
-import sttp.tapir.client.sttp.SttpClientInterpreter
-import zio.{ZIO, ZLayer}
 
 object CompanyPage:
   val companiesBus = EventBus[List[Company]]()
@@ -33,7 +30,7 @@ object CompanyPage:
           cls := "row jvm-recent-companies-body",
           div(
             cls := "col-lg-4",
-            div("TODO filter panel here")
+            FilterPanel()
           ),
           div(
             cls := "col-lg-8",

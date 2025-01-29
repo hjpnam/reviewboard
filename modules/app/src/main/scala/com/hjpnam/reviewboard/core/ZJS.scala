@@ -1,12 +1,8 @@
 package com.hjpnam.reviewboard.core
 
-import com.hjpnam.reviewboard.config.BackendClientConfig
 import com.raquo.airstream.eventbus.EventBus
-import sttp.client3.UriContext
-import sttp.client3.impl.zio.FetchZioBackend
 import sttp.tapir.Endpoint
-import sttp.tapir.client.sttp.SttpClientInterpreter
-import zio.{RIO, Runtime, Task, Unsafe, ZIO}
+import zio.{Runtime, Task, Unsafe, ZIO}
 
 object ZJS:
   def backendCall = ZIO.serviceWithZIO[BackendClient]

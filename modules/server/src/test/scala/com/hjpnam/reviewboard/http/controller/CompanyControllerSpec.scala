@@ -1,6 +1,6 @@
 package com.hjpnam.reviewboard.http.controller
 
-import com.hjpnam.reviewboard.domain.data.Company
+import com.hjpnam.reviewboard.domain.data.{Company, CompanyFilter}
 import com.hjpnam.reviewboard.http.controller.util.BackendStub
 import com.hjpnam.reviewboard.http.request.CreateCompanyRequest
 import com.hjpnam.reviewboard.service.CompanyService
@@ -24,6 +24,8 @@ object CompanyControllerSpec extends ZIOSpecDefault, BackendStub:
 
     override def getBySlug(slug: String): Task[Option[Company]] =
       ZIO.succeed(Option.when(slug == testCompany.slug)(testCompany))
+
+    override def allFilters: Task[CompanyFilter] = ???
   }
 
   private val controllerBackendStubZIO: (

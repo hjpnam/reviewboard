@@ -12,11 +12,9 @@ final case class Company(
     industry: Option[String] = None,
     image: Option[String] = None,
     tags: List[String] = Nil
-)
+) derives JsonCodec
 
 object Company:
-  given codec: JsonCodec[Company] = DeriveJsonCodec.gen[Company]
-
   def makeSlug(name: String): String =
     name
       .replaceAll(" +", " ")
