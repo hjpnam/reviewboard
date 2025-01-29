@@ -31,7 +31,7 @@ class CompanyController private (companyService: CompanyService)
   }
 
   override val routes: List[ZServerEndpoint[Any, Any]] =
-    create :: getAll :: getById :: allFilters :: Nil
+    create :: getAll :: allFilters :: getById :: Nil
 
 object CompanyController:
   val makeZIO: URIO[CompanyService, CompanyController] =
