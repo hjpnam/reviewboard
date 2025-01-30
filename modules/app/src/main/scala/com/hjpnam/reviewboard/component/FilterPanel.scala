@@ -5,19 +5,20 @@ import com.hjpnam.reviewboard.domain.data.CompanyFilter
 import com.raquo.laminar.api.L.{*, given}
 import com.raquo.laminar.codecs.StringAsIsCodec
 
-object FilterPanel:
+class FilterPanel:
   case class CheckValueEvent(groupName: String, value: String, checked: Boolean)
 
-  val GROUP_LOCATIONS  = "Locations"
-  val GROUP_COUNTRIES  = "Countries"
-  val GROUP_INDUSTRIES = "Industries"
-  val GROUP_TAGS       = "Tags"
+  private val GROUP_LOCATIONS  = "Locations"
+  private val GROUP_COUNTRIES  = "Countries"
+  private val GROUP_INDUSTRIES = "Industries"
+  private val GROUP_TAGS       = "Tags"
 
-  val possibleFilter    = EventBus[CompanyFilter]()
-  val checkEvents       = EventBus[CheckValueEvent]()
-  val applyFilterClicks = EventBus[Unit]()
-  val dirty = applyFilterClicks.events.mapTo(false).mergeWith(checkEvents.events.mapTo(true))
-  val state: Signal[CompanyFilter] =
+  private val possibleFilter    = EventBus[CompanyFilter]()
+  private val checkEvents       = EventBus[CheckValueEvent]()
+  private val applyFilterClicks = EventBus[Unit]()
+  private val dirty =
+    applyFilterClicks.events.mapTo(false).mergeWith(checkEvents.events.mapTo(true))
+  private val state: Signal[CompanyFilter] =
     checkEvents.events
       .scanLeft(Map.empty[String, Set[String]])((currentMap, event) =>
         event match
@@ -36,6 +37,9 @@ object FilterPanel:
           tags = checkMap.getOrElse(GROUP_TAGS, Set()).toList
         )
       )
+
+  val appliedFilterStream: EventStream[CompanyFilter] =
+    applyFilterClicks.events.withCurrentValueOf(state)
 
   def apply() =
     div(

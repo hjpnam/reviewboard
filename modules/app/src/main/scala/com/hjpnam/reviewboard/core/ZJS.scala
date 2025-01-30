@@ -1,5 +1,6 @@
 package com.hjpnam.reviewboard.core
 
+import com.raquo.airstream.core.EventStream
 import com.raquo.airstream.eventbus.EventBus
 import sttp.tapir.Endpoint
 import zio.{Runtime, Task, Unsafe, ZIO}
@@ -15,7 +16,13 @@ object ZJS:
         )
       )
 
-    def runJs = Unsafe.unsafely(Runtime.default.unsafe.runToFuture(zio.provide(BackendClient.configuredLive)))
+    def toEventStream: EventStream[A] =
+      val bus = EventBus[A]()
+      emitTo(bus)
+      bus.events
+
+    def runJs =
+      Unsafe.unsafely(Runtime.default.unsafe.runToFuture(zio.provide(BackendClient.configuredLive)))
 
   extension [I, E <: Throwable, O](endpoint: Endpoint[Unit, I, E, O, Any])
     def apply(payload: I): Task[O] =

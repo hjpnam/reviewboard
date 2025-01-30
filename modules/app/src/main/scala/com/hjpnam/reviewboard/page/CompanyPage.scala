@@ -3,19 +3,22 @@ package com.hjpnam.reviewboard.page
 import com.hjpnam.reviewboard.common.Constant
 import com.hjpnam.reviewboard.component.{Anchor, FilterPanel}
 import com.hjpnam.reviewboard.core.BackendClient
+import com.hjpnam.reviewboard.core.ZJS.*
 import com.hjpnam.reviewboard.domain.data.Company
 import com.raquo.laminar.api.L.{*, given}
 
 object CompanyPage:
-  val companiesBus = EventBus[List[Company]]()
+  val filterPanel = new FilterPanel
 
-  def performBackendCall(): Unit =
-    import com.hjpnam.reviewboard.core.ZJS.*
-    backendCall(_.company.getAllEndpoint.apply(())).emitTo(companiesBus)
+  val companyEvents: EventStream[List[Company]] =
+    backendCall(_.company.getAllEndpoint(())).toEventStream.mergeWith(
+      filterPanel.appliedFilterStream.flatMapSwitch(companyFilter =>
+        backendCall(_.company.searchEndpoint(companyFilter)).toEventStream
+      )
+    )
 
   def apply() =
     sectionTag(
-      onMountCallback(_ => performBackendCall()),
       cls := "section-1",
       div(
         cls := "container company-list-hero",
@@ -30,11 +33,11 @@ object CompanyPage:
           cls := "row jvm-recent-companies-body",
           div(
             cls := "col-lg-4",
-            FilterPanel()
+            filterPanel()
           ),
           div(
             cls := "col-lg-8",
-            children <-- companiesBus.events.map(_.map(renderCompany))
+            children <-- companyEvents.map(_.map(renderCompany))
           )
         )
       )
