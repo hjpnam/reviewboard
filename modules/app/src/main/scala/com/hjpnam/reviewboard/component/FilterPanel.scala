@@ -1,11 +1,45 @@
 package com.hjpnam.reviewboard.component
 
+import com.hjpnam.reviewboard.core.ZJS.*
+import com.hjpnam.reviewboard.domain.data.CompanyFilter
 import com.raquo.laminar.api.L.{*, given}
 import com.raquo.laminar.codecs.StringAsIsCodec
 
 object FilterPanel:
+  case class CheckValueEvent(groupName: String, value: String, checked: Boolean)
+
+  val GROUP_LOCATIONS  = "Locations"
+  val GROUP_COUNTRIES  = "Countries"
+  val GROUP_INDUSTRIES = "Industries"
+  val GROUP_TAGS       = "Tags"
+
+  val possibleFilter    = EventBus[CompanyFilter]()
+  val checkEvents       = EventBus[CheckValueEvent]()
+  val applyFilterClicks = EventBus[Unit]()
+  val dirty = applyFilterClicks.events.mapTo(false).mergeWith(checkEvents.events.mapTo(true))
+  val state: Signal[CompanyFilter] =
+    checkEvents.events
+      .scanLeft(Map.empty[String, Set[String]])((currentMap, event) =>
+        event match
+          case CheckValueEvent(groupName, value, checked) =>
+            if checked then
+              currentMap.updatedWith(groupName)(maybeValueSet =>
+                Some(maybeValueSet.fold(Set(value))(_ + value))
+              )
+            else currentMap.updatedWith(groupName)(_.fold(None)(valueSet => Some(valueSet - value)))
+      )
+      .map(checkMap =>
+        CompanyFilter(
+          locations = checkMap.getOrElse(GROUP_LOCATIONS, Set()).toList,
+          countries = checkMap.getOrElse(GROUP_COUNTRIES, Set()).toList,
+          industries = checkMap.getOrElse(GROUP_INDUSTRIES, Set()).toList,
+          tags = checkMap.getOrElse(GROUP_TAGS, Set()).toList
+        )
+      )
+
   def apply() =
     div(
+      onMountCallback(_ => backendCall(_.company.allFiltersEndpoint(())).emitTo(possibleFilter)),
       cls    := "accordion accordion-flush",
       idAttr := "accordionFlushExample",
       div(
@@ -37,24 +71,30 @@ object FilterPanel:
           htmlAttr("data-bs-parent", StringAsIsCodec)  := "#accordionFlushExample",
           div(
             cls := "accordion-body p-0",
-            renderFilterOptions("Locations", List("London", "Paris")),
-            renderFilterOptions("Countries", List("UK", "France")),
-            renderFilterOptions("Industries", List("Banking", "Aviation")),
-            renderFilterOptions("Tags", List("Scala", "ZIO", "Typelevel")),
-            div(
-              cls := "jvm-accordion-search-btn",
-              button(
-                cls    := "btn btn-primary",
-                `type` := "button",
-                "Apply Filters"
-              )
-            )
+            renderFilterOptions(GROUP_LOCATIONS, _.locations),
+            renderFilterOptions(GROUP_COUNTRIES, _.countries),
+            renderFilterOptions(GROUP_INDUSTRIES, _.industries),
+            renderFilterOptions(GROUP_TAGS, _.tags),
+            renderApplyBtn
           )
         )
       )
     )
 
-  def renderFilterOptions(groupName: String, options: List[String]) =
+  private def renderApplyBtn = {
+    div(
+      cls := "jvm-accordion-search-btn",
+      button(
+        disabled <-- dirty.toSignal(false).map(!_),
+        onClick.mapTo(()) --> applyFilterClicks,
+        cls    := "btn btn-primary",
+        `type` := "button",
+        "Apply Filters"
+      )
+    )
+  }
+
+  def renderFilterOptions(groupName: String, optionsFn: CompanyFilter => List[String]) =
     div(
       cls := "accordion-item",
       h2(
@@ -79,22 +119,26 @@ object FilterPanel:
           cls := "accordion-body",
           div(
             cls := "mb-3",
-            options.map { value =>
-              div(
-                cls := "form-check",
-                label(
-                  cls   := "form-check-label",
-                  forId := s"filter-$groupName-$value",
-                  value
-                ),
-                input(
-                  cls    := "form-check-input",
-                  `type` := "checkbox",
-                  idAttr := s"filter-$groupName-$value"
-                )
-              )
-            }
+            children <-- possibleFilter.events.map(optionsFn(_).map(renderCheckbox(groupName)))
           )
         )
       )
     )
+
+  private def renderCheckbox(groupName: String)(value: String) =
+    div(
+      cls := "form-check",
+      label(
+        cls   := "form-check-label",
+        forId := s"filter-$groupName-$value",
+        value
+      ),
+      input(
+        cls    := "form-check-input",
+        `type` := "checkbox",
+        idAttr := s"filter-$groupName-$value",
+        onChange.mapToChecked.map(CheckValueEvent(groupName, value, _)) --> checkEvents
+      )
+    )
+
+end FilterPanel

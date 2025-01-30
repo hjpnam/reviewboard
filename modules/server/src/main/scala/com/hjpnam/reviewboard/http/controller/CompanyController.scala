@@ -11,8 +11,7 @@ class CompanyController private (companyService: CompanyService)
     extends BaseController,
       CompanyEndpoint:
 
-  val create =
-    createEndpoint.zServerLogic[Any](req => companyService.create(req).mapToHttpError)
+  val create = createEndpoint.zServerLogic[Any](companyService.create(_).mapToHttpError)
 
   val getAll = getAllEndpoint.zServerLogic[Any](_ => companyService.getAll.mapToHttpError)
 
@@ -30,8 +29,10 @@ class CompanyController private (companyService: CompanyService)
     companyService.allFilters.mapToHttpError
   }
 
+  val search = searchEndpoint.zServerLogic[Any](companyService.search(_).mapToHttpError)
+
   override val routes: List[ZServerEndpoint[Any, Any]] =
-    create :: getAll :: allFilters :: getById :: Nil
+    create :: getAll :: allFilters :: search :: getById :: Nil
 
 object CompanyController:
   val makeZIO: URIO[CompanyService, CompanyController] =

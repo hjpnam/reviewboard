@@ -26,6 +26,8 @@ object CompanyControllerSpec extends ZIOSpecDefault, BackendStub:
       ZIO.succeed(Option.when(slug == testCompany.slug)(testCompany))
 
     override def allFilters: Task[CompanyFilter] = ???
+
+    override def search(filter: CompanyFilter): Task[List[Company]] = ???
   }
 
   private val controllerBackendStubZIO: (

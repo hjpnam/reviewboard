@@ -6,6 +6,8 @@ import io.getquill.*
 import io.getquill.jdbczio.Quill
 import zio.{Task, URLayer, ZIO, ZLayer}
 
+import java.sql.SQLException
+
 trait CompanyRepository:
   def create(company: Company): Task[Company]
   def update(id: Long, op: Company => Company): Task[Company]
@@ -14,6 +16,7 @@ trait CompanyRepository:
   def getBySlug(slug: String): Task[Option[Company]]
   def get: Task[List[Company]]
   def uniqueAttributes: Task[CompanyFilter]
+  def search(filter: CompanyFilter): Task[List[Company]]
 
 object CompanyRepository:
   val live: URLayer[Quill.Postgres[SnakeCase.type], CompanyRepositoryLive] = ZLayer {
@@ -69,3 +72,16 @@ class CompanyRepositoryLive(quill: Quill.Postgres[SnakeCase.type]) extends Compa
       industries <- run(query[Company].map(_.industry).distinct).map(_.flatMap(_.toList))
       tags       <- run(query[Company].map(_.tags).distinct).map(_.flatten.distinct)
     yield CompanyFilter(locations, countries, industries, tags)
+
+  override def search(filter: CompanyFilter): Task[List[Company]] =
+    if filter.isEmpty then get
+    else
+      run(
+        query[Company]
+          .filter(company =>
+            liftQuery(filter.locations).contains(company.location)
+              || liftQuery(filter.countries).contains(company.country)
+              || liftQuery(filter.industries).contains(company.industry)
+              || sql"${lift(filter.tags)} && ${company.tags}".asCondition
+          )
+      )

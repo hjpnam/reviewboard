@@ -11,6 +11,7 @@ trait CompanyService:
   def getById(id: Long): Task[Option[Company]]
   def getBySlug(slug: String): Task[Option[Company]]
   def allFilters: Task[CompanyFilter]
+  def search(filter: CompanyFilter): Task[List[Company]]
 
 object CompanyService:
   val live: URLayer[CompanyRepository, CompanyServiceLive] = ZLayer {
@@ -32,3 +33,5 @@ class CompanyServiceLive(companyRepository: CompanyRepository) extends CompanySe
     companyRepository.getBySlug(slug)
 
   override def allFilters: Task[CompanyFilter] = companyRepository.uniqueAttributes
+
+  override def search(filter: CompanyFilter): Task[List[Company]] = companyRepository.search(filter)

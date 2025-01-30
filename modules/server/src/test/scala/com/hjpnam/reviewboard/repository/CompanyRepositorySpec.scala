@@ -72,9 +72,23 @@ object CompanyRepositorySpec extends ZIOSpecDefault, RepositorySpec, TestGen:
         yield assert(companies)(hasSameElements(companiesFetched))
       },
       test("get all filters") {
-        val company1 = testCompany().copy(industry = Some(genString(8)), location = Some(genString(8)), country = Some(genString(8)), tags = genString(8) :: genString(8) :: Nil)
-        val company2 = company1.copy(slug = company1.slug.drop(1), name = company1.name.drop(1), url = company1.url.drop(1))
-        val company3 = testCompany().copy(industry = None, location = Some(genString(8)), country = Some(genString(8)), tags = Nil)
+        val company1 = testCompany().copy(
+          industry = Some(genString(8)),
+          location = Some(genString(8)),
+          country = Some(genString(8)),
+          tags = genString(8) :: genString(8) :: Nil
+        )
+        val company2 = company1.copy(
+          slug = company1.slug.drop(1),
+          name = company1.name.drop(1),
+          url = company1.url.drop(1)
+        )
+        val company3 = testCompany().copy(
+          industry = None,
+          location = Some(genString(8)),
+          country = Some(genString(8)),
+          tags = Nil
+        )
         val companies          = company1 :: company2 :: company3 :: Nil
         val expectedLocations  = companies.flatMap(_.location.toList)
         val expectedCountries  = companies.flatMap(_.country.toList)
@@ -93,6 +107,63 @@ object CompanyRepositorySpec extends ZIOSpecDefault, RepositorySpec, TestGen:
           hasField("industries", _.industries, hasSameElementsDistinct(expectedIndustries))
         ) && assert(filters)(
           hasField("tags", _.tags, hasSameElementsDistinct(expectedTags))
+        )
+      },
+      test("search") {
+        val company1 = testCompany().copy(
+          industry = Some(genString(8)),
+          location = Some(genString(8)),
+          country = Some(genString(8)),
+          tags = genString(8) :: genString(8) :: Nil
+        )
+        val company2 = company1.copy(
+          slug = company1.slug.drop(1),
+          name = company1.name.drop(1),
+          url = company1.url.drop(1)
+        )
+        val company3 = testCompany().copy(
+          industry = None,
+          location = Some(genString(8)),
+          country = Some(genString(8)),
+          tags = Nil
+        )
+        val companies = company1 :: company2 :: company3 :: Nil
+        for
+          repo <- ZIO.service[CompanyRepository]
+          _    <- ZIO.foreachDiscard(companies)(repo.create)
+          queryResult <- repo.search(
+            CompanyFilter(
+              locations = company1.location.get :: Nil,
+              countries = company3.country.get :: Nil
+            )
+          )
+        yield assert(queryResult.map(_.name))(hasSameElements(companies.map(_.name)))
+      },
+      test("search by tags") {
+        val company1 = testCompany().copy(
+          industry = Some(genString(8)),
+          location = Some(genString(8)),
+          country = Some(genString(8)),
+          tags = genString(8) :: genString(8) :: Nil
+        )
+        val company2 = company1.copy(
+          slug = company1.slug.drop(1),
+          name = company1.name.drop(1),
+          url = company1.url.drop(1)
+        )
+        val company3 = testCompany().copy(
+          industry = None,
+          location = Some(genString(8)),
+          country = Some(genString(8)),
+          tags = Nil
+        )
+        val companies = company1 :: company2 :: company3 :: Nil
+        for
+          repo        <- ZIO.service[CompanyRepository]
+          _           <- ZIO.foreachDiscard(companies)(repo.create)
+          queryResult <- repo.search(CompanyFilter(tags = company1.tags.take(1)))
+        yield assert(queryResult.map(_.name))(
+          hasSameElements((company1 :: company2 :: Nil).map(_.name))
         )
       }
     ).provide(CompanyRepository.live, dataSourceLayer, Repository.quillLayer, Scope.default)
