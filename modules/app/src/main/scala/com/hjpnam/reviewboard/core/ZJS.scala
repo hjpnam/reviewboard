@@ -3,7 +3,7 @@ package com.hjpnam.reviewboard.core
 import com.raquo.airstream.core.EventStream
 import com.raquo.airstream.eventbus.EventBus
 import sttp.tapir.Endpoint
-import zio.{Runtime, Task, Unsafe, ZIO}
+import zio.{CancelableFuture, Runtime, Task, Unsafe, ZIO}
 
 object ZJS:
   def backendCall = ZIO.serviceWithZIO[BackendClient]
@@ -21,7 +21,7 @@ object ZJS:
       emitTo(bus)
       bus.events
 
-    def runJs =
+    def runJs: CancelableFuture[A] =
       Unsafe.unsafely(Runtime.default.unsafe.runToFuture(zio.provide(BackendClient.configuredLive)))
 
   extension [I, E <: Throwable, O](endpoint: Endpoint[Unit, I, E, O, Any])

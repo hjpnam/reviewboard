@@ -1,7 +1,7 @@
 package com.hjpnam.reviewboard.core
 
 import com.hjpnam.reviewboard.config.BackendClientConfig
-import com.hjpnam.reviewboard.http.endpoint.CompanyEndpoint
+import com.hjpnam.reviewboard.http.endpoint.{CompanyEndpoint, UserEndpoint}
 import sttp.client3.UriContext
 import sttp.capabilities.WebSockets
 import sttp.capabilities.zio.ZioStreams
@@ -12,7 +12,8 @@ import sttp.tapir.client.sttp.SttpClientInterpreter
 import zio.*
 
 trait BackendClient:
-  def company: CompanyEndpoint
+  val company: CompanyEndpoint
+  val user: UserEndpoint
   def endpointRequestZIO[I, E <: Throwable, O](
       endpoint: Endpoint[Unit, I, E, O, Any],
       payload: I
@@ -28,6 +29,8 @@ class BackendClientLive private (
     backendClientConfig: BackendClientConfig
 ) extends BackendClient:
   override val company: CompanyEndpoint = new CompanyEndpoint {}
+  override val user: UserEndpoint       = new UserEndpoint {}
+
   private def endpointRequest[I, E, O](
       endpoint: Endpoint[Unit, I, E, O, Any]
   ): I => Request[Either[E, O], Any] =

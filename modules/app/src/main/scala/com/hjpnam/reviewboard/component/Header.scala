@@ -5,7 +5,6 @@ import com.raquo.laminar.api.L.{*, given}
 import com.raquo.laminar.codecs.*
 
 import scala.scalajs.js
-import scala.scalajs.js.annotation.JSImport
 
 object Header:
   def apply() =
