@@ -10,8 +10,9 @@ import com.raquo.laminar.api.L.{*, given}
 object CompanyPage:
   val filterPanel = new FilterPanel
 
+  val firstGetAll = EventBus[List[Company]]()
   val companyEvents: EventStream[List[Company]] =
-    backendCall(_.company.getAllEndpoint(())).toEventStream.mergeWith(
+    firstGetAll.events.mergeWith(
       filterPanel.appliedFilterStream.flatMapSwitch(companyFilter =>
         backendCall(_.company.searchEndpoint(companyFilter)).toEventStream
       )
@@ -19,6 +20,7 @@ object CompanyPage:
 
   def apply() =
     sectionTag(
+      onMountCallback(_ => backendCall(_.company.getAllEndpoint(())).emitTo(firstGetAll)),
       cls := "section-1",
       div(
         cls := "container company-list-hero",

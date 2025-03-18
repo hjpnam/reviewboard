@@ -1,6 +1,7 @@
 package com.hjpnam.reviewboard.page
 
 import com.hjpnam.reviewboard.common.Constant
+import com.hjpnam.reviewboard.core.Session
 import com.raquo.laminar.api.L.{*, given}
 import com.hjpnam.reviewboard.core.ZJS.*
 import com.hjpnam.reviewboard.http.request.LoginRequest
@@ -30,6 +31,7 @@ object LoginPage:
     else
       backendCall(_.user.generateTokenEndpoint(LoginRequest(state.email, state.password)))
         .map(userToken =>
+          Session.setUserState(userToken)
           stateVar.set(State())
           BrowserNavigation.replaceState("/")
         )

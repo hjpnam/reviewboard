@@ -1,6 +1,8 @@
 package com.hjpnam.reviewboard.component
 
 import com.hjpnam.reviewboard.common.Constant
+import com.hjpnam.reviewboard.core.Session
+import com.hjpnam.reviewboard.domain.data.UserToken
 import com.raquo.laminar.api.L.{*, given}
 import com.raquo.laminar.codecs.*
 
@@ -34,7 +36,7 @@ object Header:
                 idAttr := "navbarNav",
                 ul(
                   cls := "navbar-nav ms-auto menu align-center expanded text-center SMN_effect-3",
-                  renderNavLinks()
+                  children <-- Session.userState.signal.map(renderNavLinks)
                 )
               )
             )
@@ -54,11 +56,17 @@ object Header:
       )
     )
 
-  private def renderNavLinks() =
-    renderNavLink("Company", "/company")
-      :: renderNavLink("Log In", "/login")
-      :: renderNavLink("Sign Up", "/signup")
-      :: Nil
+  private def renderNavLinks(maybeUser: Option[UserToken]) =
+    val constantLinks = List(renderNavLink("Companies", "/companies"))
+    val unauthedLinks = List(renderNavLink("Log In", "/login"), renderNavLink("Sign Up", "/signup"))
+    val authedLinks = List(
+      renderNavLink("Add Company", "/post"),
+      renderNavLink("Profile", "/profile"),
+      renderNavLink("Log Out", "/logout")
+    )
+    val customLinks = if Session.isActive then authedLinks else unauthedLinks
+
+    constantLinks ++ customLinks
 
   private def renderNavLink(text: String, location: String) =
     li(
