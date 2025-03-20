@@ -52,7 +52,7 @@ class UserController private (userService: UserService, val jwtService: JWTServi
     .zServerLogic[Any] { case RecoverPasswordRequest(email, token, newPassword) =>
       userService
         .recoverPassword(email, token, newPassword)
-        .filterOrFail(identity)(Unauthorized(""))
+        .filterOrFail(identity)(Unauthorized("The email/token combination is invalid."))
         .unit
         .mapToHttpError
     }

@@ -21,7 +21,7 @@ final case class ForgotPasswordState(
   override val maybeSuccess: Option[String] = upstreamStatus.flatMap(_.toOption)
 
 object ForgotPasswordPage extends FormPage[ForgotPasswordState]("Forgot Password"):
-  override val stateVar: Var[ForgotPasswordState] = Var(ForgotPasswordState())
+  override def basicState: ForgotPasswordState = ForgotPasswordState()
 
   override def renderChildren(): List[ReactiveElement[Element]] = List(
     renderInput(
@@ -34,15 +34,17 @@ object ForgotPasswordPage extends FormPage[ForgotPasswordState]("Forgot Password
     ),
     button(
       `type` := "button",
-      "Sign Up",
+      "Send Recovery Email",
       onClick.preventDefault.mapTo(stateVar.now()) --> submitter
-    )
+    ),
+    Anchor.renderNavLink("Have a recovery token?", "/recover", "auth-link")
   )
 
   val submitter = Observer[ForgotPasswordState] { state =>
     if state.hasError then stateVar.update(_.copy(showStatus = true))
     else
-      backendCall(_.user.forgotPasswordEndpoint(ForgotPasswordRequest(state.email))).as {
+      backendCall(_.user.forgotPasswordEndpoint(ForgotPasswordRequest(state.email)))
+        .as {
           stateVar.update(
             _.copy(showStatus = true, upstreamStatus = Some(Right("Check your email")))
           )

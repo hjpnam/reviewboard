@@ -42,11 +42,19 @@ class RecoveryTokenRepositoryLive(
       case _       => ZIO.none
     }
 
-  override def checkToken(email: String, token: String): Task[Boolean] = run(
-    query[PasswordRecoveryToken]
-      .filter(r => r.email == lift(email) && r.token == lift(token))
-      .map(_.email)
-  ).map(_.nonEmpty)
+  override def checkToken(email: String, token: String): Task[Boolean] =
+    for
+      now <- Clock.instant
+      isValid <- run(
+        query[PasswordRecoveryToken]
+          .filter(r =>
+            r.email == lift(email) && r.token == lift(token) && r.expiration > lift(
+              now.toEpochMilli
+            )
+          )
+          .map(_.email)
+      ).map(_.nonEmpty)
+    yield isValid
 
   private def findToken(email: String): Task[Option[String]] = run(
     query[PasswordRecoveryToken].filter(_.email == lift(email)).map(_.token)

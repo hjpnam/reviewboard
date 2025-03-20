@@ -25,6 +25,9 @@ object Router:
           path("forgot")(
             ForgotPasswordPage()
           ),
+          path("recover")(
+            RecoverPasswordPage()
+          ),
           path("logout")(
             LogoutPage()
           ),

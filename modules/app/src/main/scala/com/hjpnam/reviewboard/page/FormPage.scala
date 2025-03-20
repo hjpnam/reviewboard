@@ -16,10 +16,12 @@ trait FormState:
     maybeError.map(Left(_)).orElse(maybeSuccess.map(Right(_))).filter(_ => showStatus)
 
 abstract class FormPage[S <: FormState](title: String):
-  val stateVar: Var[S]
+  def basicState: S
+  val stateVar: Var[S] = Var(basicState)
 
   def apply() =
     div(
+      onUnmountCallback(_ => stateVar.set(basicState)),
       cls := "row",
       div(
         cls := "col-md-5 p-0",

@@ -26,7 +26,8 @@ final case class LoginFormState(
   override val maybeSuccess: Option[String] = None
 
 object LoginPage extends FormPage[LoginFormState]("Log In"):
-  override val stateVar = Var(LoginFormState())
+  override def basicState: LoginFormState = LoginFormState()
+
   val submitter = Observer[LoginFormState] { state =>
     if state.hasError then stateVar.update(_.copy(showStatus = true))
     else

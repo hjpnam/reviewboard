@@ -29,7 +29,7 @@ final case class SignUpFormState(
   override val maybeSuccess: Option[String] = upstreamStatus.flatMap(_.toOption)
 
 object SignUpPage extends FormPage[SignUpFormState]("Sign Up"):
-  override val stateVar: Var[SignUpFormState] = Var(SignUpFormState())
+  override def basicState: SignUpFormState = SignUpFormState()
   override def renderChildren(): List[ReactiveElement[dom.Element]] = List(
     renderInput(
       "Email",

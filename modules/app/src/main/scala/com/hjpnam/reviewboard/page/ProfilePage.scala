@@ -26,7 +26,7 @@ final case class ChangePasswordState(
   override val maybeSuccess: Option[String] = upstreamStatus.flatMap(_.toOption)
 
 object ProfilePage extends FormPage[ChangePasswordState]("Profile"):
-  override val stateVar: Var[ChangePasswordState] = Var(ChangePasswordState())
+  override def basicState: ChangePasswordState = ChangePasswordState()
   override def renderChildren(): List[ReactiveElement[Element]] =
     if Session.isActive then
       List(
