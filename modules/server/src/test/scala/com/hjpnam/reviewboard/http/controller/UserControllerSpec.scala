@@ -48,14 +48,14 @@ object UserControllerSpec extends ZIOSpecDefault, BackendStub, TestObject, Servi
         yield assert(response)(isLeft(equalTo("failed to login")))
       },
       test("PUT /user/password") {
-        val request = UpdatePasswordRequest(testUser.email, testUser.hashedPassword, "new-password")
+        val request = UpdatePasswordRequest(testUser.hashedPassword, "new-password")
         for
           backendStub <- controllerBackendStubZIO(_.updatePassword :: Nil)
           response    <- backendStub.putAuth[UserResponse]("/user/password", request, testAuthToken)
         yield assert(response)(isRight(equalTo(UserResponse(testUser.email))))
       },
       test("PUT /user/password without bearer token") {
-        val request = UpdatePasswordRequest(testUser.email, testUser.hashedPassword, "new-password")
+        val request = UpdatePasswordRequest(testUser.hashedPassword, "new-password")
         for
           backendStub <- controllerBackendStubZIO(_.updatePassword :: Nil)
           response <- basicRequest
@@ -65,7 +65,7 @@ object UserControllerSpec extends ZIOSpecDefault, BackendStub, TestObject, Servi
         yield assert(response.body)(isLeft)
       },
       test("PUT /user/password with an invalid bearer token") {
-        val request = UpdatePasswordRequest(testUser.email, testUser.hashedPassword, "new-password")
+        val request = UpdatePasswordRequest(testUser.hashedPassword, "new-password")
         for
           backendStub <- controllerBackendStubZIO(_.updatePassword :: Nil)
           response <- backendStub.putAuth[UserResponse]("/user/password", request, "invalid-token")

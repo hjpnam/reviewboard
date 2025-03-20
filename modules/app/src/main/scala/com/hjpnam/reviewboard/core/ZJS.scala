@@ -5,6 +5,8 @@ import com.raquo.airstream.eventbus.EventBus
 import sttp.tapir.Endpoint
 import zio.{CancelableFuture, Runtime, Task, Unsafe, ZIO}
 
+import scala.annotation.targetName
+
 object ZJS:
   def backendCall = ZIO.serviceWithZIO[BackendClient]
 
@@ -25,7 +27,12 @@ object ZJS:
       Unsafe.unsafely(Runtime.default.unsafe.runToFuture(zio.provide(BackendClient.configuredLive)))
 
   extension [I, E <: Throwable, O](endpoint: Endpoint[Unit, I, E, O, Any])
-    def apply(payload: I): Task[O] =
-      ZIO
-        .serviceWithZIO[BackendClient](_.endpointRequestZIO(endpoint, payload))
-        .provide(BackendClient.configuredLive)
+    def apply(payload: I): Task[O] = ZIO
+      .serviceWithZIO[BackendClient](_.endpointRequestZIO(endpoint, payload))
+      .provide(BackendClient.configuredLive)
+
+  extension [I, E <: Throwable, O](endpoint: Endpoint[String, I, E, O, Any])
+    @targetName("applySecure")
+    def apply(payload: I): Task[O] = ZIO
+      .serviceWithZIO[BackendClient](_.secureEndpointRequestZIO(endpoint)(payload))
+      .provide(BackendClient.configuredLive)

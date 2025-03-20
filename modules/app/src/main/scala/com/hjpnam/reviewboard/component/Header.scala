@@ -57,14 +57,14 @@ object Header:
     )
 
   private def renderNavLinks(maybeUser: Option[UserToken]) =
-    val constantLinks = List(renderNavLink("Companies", "/companies"))
+    val constantLinks = List(renderNavLink("Companies", "/company"))
     val unauthedLinks = List(renderNavLink("Log In", "/login"), renderNavLink("Sign Up", "/signup"))
     val authedLinks = List(
       renderNavLink("Add Company", "/post"),
       renderNavLink("Profile", "/profile"),
       renderNavLink("Log Out", "/logout")
     )
-    val customLinks = if Session.isActive then authedLinks else unauthedLinks
+    val customLinks = if maybeUser.nonEmpty then authedLinks else unauthedLinks
 
     constantLinks ++ customLinks
 

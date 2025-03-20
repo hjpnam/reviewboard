@@ -5,7 +5,12 @@ import com.hjpnam.reviewboard.domain.data.UserToken
 import com.hjpnam.reviewboard.http.controller.*
 import com.hjpnam.reviewboard.http.request.*
 import com.hjpnam.reviewboard.http.response.UserResponse
-import com.hjpnam.reviewboard.repository.{RecoveryTokenRepository, Repository, RepositorySpec, UserRepository}
+import com.hjpnam.reviewboard.repository.{
+  RecoveryTokenRepository,
+  Repository,
+  RepositorySpec,
+  UserRepository
+}
 import com.hjpnam.reviewboard.service.*
 import sttp.client3.testing.SttpBackendStub
 import sttp.client3.{HttpError as _, *}
@@ -85,7 +90,7 @@ object UserFlowSpec extends ZIOSpecDefault, RepositorySpec:
             .absolve
           _ <- backendStub.putAuth[UserResponse](
             "/user/password",
-            UpdatePasswordRequest(testEmail, testPassword, newPassword),
+            UpdatePasswordRequest(testPassword, newPassword),
             userToken.token
           )
           failedLogin <- backendStub.post[UserToken](
