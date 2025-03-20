@@ -1,6 +1,7 @@
 package com.hjpnam.reviewboard.page
 
 import com.hjpnam.reviewboard.common.Constant
+import com.hjpnam.reviewboard.component.Anchor
 import com.hjpnam.reviewboard.core.Session
 import com.hjpnam.reviewboard.core.ZJS.*
 import com.hjpnam.reviewboard.http.request.LoginRequest
@@ -66,5 +67,6 @@ object LoginPage extends FormPage[LoginFormState]("Log In"):
       `type` := "button",
       "Log In",
       onClick.preventDefault.mapTo(stateVar.now()) --> submitter
-    )
+    ),
+    Anchor.renderNavLink("Forgot password?", "/forgot", "auth-link")
   )

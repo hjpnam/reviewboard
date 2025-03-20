@@ -16,7 +16,7 @@ val tapirVersion      = "1.11.13"
 val zioLoggingVersion = "2.4.0"
 val zioConfigVersion  = "4.0.3"
 val sttpVersion       = "3.10.2"
-val javaMailVersion   = "1.6.2"
+val javaMailVersion   = "1.6.7"
 val stripeVersion     = "24.3.0"
 val catsVersion       = "2.12.0"
 
@@ -49,7 +49,7 @@ val serverDependencies = commonDependencies ++ Seq(
   "io.github.scottweaver" %% "zio-2-0-testcontainers-postgresql" % "0.10.0",
   "dev.zio"               %% "zio-prelude"                       % "1.0.0-RC37",
   "com.auth0"              % "java-jwt"                          % "4.4.0",
-  "com.sun.mail"           % "javax.mail"                        % javaMailVersion,
+  "jakarta.mail"           % "jakarta.mail-api"                  % javaMailVersion,
   "com.stripe"             % "stripe-java"                       % stripeVersion,
   "org.typelevel"         %% "cats-core"                         % catsVersion,
   "org.eclipse.angus"      % "angus-mail"                        % "2.0.3"
