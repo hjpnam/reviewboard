@@ -10,8 +10,8 @@ object Router:
       routes(
         div(
           cls := "container-fluid",
-          (pathEnd | path("company"))(
-            CompanyPage()
+          (pathEnd | path("companies"))(
+            CompaniesPage()
           ),
           path("login")(
             LoginPage()
@@ -30,6 +30,9 @@ object Router:
           ),
           path("logout")(
             LogoutPage()
+          ),
+          path("post")(
+            CreateCompanyPage()
           ),
           noneMatched(
             NotFoundPage()
