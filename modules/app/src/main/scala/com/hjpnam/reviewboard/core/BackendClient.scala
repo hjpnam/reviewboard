@@ -1,7 +1,7 @@
 package com.hjpnam.reviewboard.core
 
 import com.hjpnam.reviewboard.config.BackendClientConfig
-import com.hjpnam.reviewboard.http.endpoint.{CompanyEndpoint, UserEndpoint}
+import com.hjpnam.reviewboard.http.endpoint.{CompanyEndpoint, ReviewEndpoint, UserEndpoint}
 import sttp.client3.UriContext
 import sttp.capabilities.WebSockets
 import sttp.capabilities.zio.ZioStreams
@@ -16,6 +16,7 @@ final case class RestrictedEndpointException(msg: String) extends RuntimeExcepti
 trait BackendClient:
   val company: CompanyEndpoint
   val user: UserEndpoint
+  val review: ReviewEndpoint
   def endpointRequestZIO[I, E <: Throwable, O](
       endpoint: Endpoint[Unit, I, E, O, Any],
       payload: I
@@ -35,6 +36,7 @@ class BackendClientLive private (
 ) extends BackendClient:
   override val company: CompanyEndpoint = new CompanyEndpoint {}
   override val user: UserEndpoint       = new UserEndpoint {}
+  override val review: ReviewEndpoint   = new ReviewEndpoint {}
 
   override def endpointRequestZIO[I, E <: Throwable, O](
       endpoint: Endpoint[Unit, I, E, O, Any],

@@ -57,7 +57,7 @@ object Header:
     )
 
   private def renderNavLinks(maybeUser: Option[UserToken]) =
-    val constantLinks = List(renderNavLink("Companies", "/company"))
+    val constantLinks = List(renderNavLink("Companies", "/companies"))
     val unauthedLinks = List(renderNavLink("Log In", "/login"), renderNavLink("Sign Up", "/signup"))
     val authedLinks = List(
       renderNavLink("Add Company", "/post"),
