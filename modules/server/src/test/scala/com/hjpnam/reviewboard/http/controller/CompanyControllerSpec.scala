@@ -38,12 +38,12 @@ object CompanyControllerSpec extends ZIOSpecDefault, BackendStub:
 
   override def spec: Spec[TestEnvironment & Scope, Any] =
     suite("CompanyControllerSpec")(
-      test("POST /companies") {
+      test("POST /company") {
         val program =
           for
             backendStub <- controllerBackendStubZIO(_.create :: Nil)
             response <- basicRequest
-              .post(uri"/companies")
+              .post(uri"/company")
               .body(CreateCompanyRequest("foo", "foo.com").toJson)
               .send(backendStub)
           yield response.body
@@ -59,7 +59,7 @@ object CompanyControllerSpec extends ZIOSpecDefault, BackendStub:
         val program = for
           backendStub <- controllerBackendStubZIO(_.getAll :: Nil)
           response <- basicRequest
-            .get(uri"/companies")
+            .get(uri"/company")
             .send(backendStub)
         yield response.body
 
@@ -74,7 +74,7 @@ object CompanyControllerSpec extends ZIOSpecDefault, BackendStub:
         val program = for
           backendStub <- controllerBackendStubZIO(_.getById :: Nil)
           response <- basicRequest
-            .get(uri"/companies/0")
+            .get(uri"/company/0")
             .send(backendStub)
         yield response.body
 
@@ -89,7 +89,7 @@ object CompanyControllerSpec extends ZIOSpecDefault, BackendStub:
         val program = for
           backendStub <- controllerBackendStubZIO(_.getById :: Nil)
           response <- basicRequest
-            .get(uri"/companies/1")
+            .get(uri"/company/1")
             .send(backendStub)
         yield response.body
 

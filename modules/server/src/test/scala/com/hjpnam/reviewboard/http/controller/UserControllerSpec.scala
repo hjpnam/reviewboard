@@ -3,7 +3,11 @@ package com.hjpnam.reviewboard.http.controller
 import com.hjpnam.reviewboard.domain.data.UserToken
 import com.hjpnam.reviewboard.fixture.{ServiceStub, TestObject}
 import com.hjpnam.reviewboard.http.controller.util.BackendStub
-import com.hjpnam.reviewboard.http.request.{LoginRequest, RegisterUserRequest, UpdatePasswordRequest}
+import com.hjpnam.reviewboard.http.request.{
+  LoginRequest,
+  RegisterUserRequest,
+  UpdatePasswordRequest
+}
 import com.hjpnam.reviewboard.http.response.UserResponse
 import com.hjpnam.reviewboard.service.{JWTService, UserService}
 import sttp.client3.*
@@ -37,7 +41,7 @@ object UserControllerSpec extends ZIOSpecDefault, BackendStub, TestObject, Servi
           backendStub <- controllerBackendStubZIO(_.login :: Nil)
           response    <- backendStub.post[UserToken]("/user/login", request)
         yield assert(response)(
-          isRight(equalTo(UserToken(testUser.email, "test-token", 3600L)))
+          isRight(equalTo(UserToken(testUser.id, testUser.email, "test-token", 3600L)))
         )
       },
       test("POST /user/login with wrong credentials") {

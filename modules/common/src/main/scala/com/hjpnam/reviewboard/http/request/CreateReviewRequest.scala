@@ -24,3 +24,6 @@ case class CreateReviewRequest(
         Field.const(_.created, timestamp),
         Field.const(_.updated, timestamp)
       )
+
+object CreateReviewRequest:
+  def fromReview(review: Review): CreateReviewRequest = review.into[CreateReviewRequest].transform()
