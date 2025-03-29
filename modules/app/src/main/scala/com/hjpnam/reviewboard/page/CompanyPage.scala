@@ -1,10 +1,12 @@
 package com.hjpnam.reviewboard.page
 
-import com.hjpnam.reviewboard.component.AddReviewCard
+import com.hjpnam.reviewboard.component.{AddReviewCard, Markdown, Time}
+import org.scalajs.dom
 import com.hjpnam.reviewboard.component.CompanyComponents.{renderCompanyImg, renderCompanyOverview}
 import com.hjpnam.reviewboard.core.Session
 import com.hjpnam.reviewboard.core.ZJS.*
 import com.hjpnam.reviewboard.domain.data.{Company, Review, UserToken}
+import com.raquo.laminar.DomApi
 import com.raquo.laminar.api.L.{*, given}
 
 object CompanyPage:
@@ -154,7 +156,8 @@ object CompanyPage:
       cls := "container",
       div(
         cls := "markdown-body overview-section",
-        // TODO add a highlight if this is "your" review
+        cls("review-highlighted") <-- Session.userState.signal
+          .map(_.map(_.id) == Option(review).map(_.userId)),
         div(
           cls := "company-description",
           div(
@@ -168,9 +171,12 @@ object CompanyPage:
           // TODO parse this Markdown
           div(
             cls := "review-content",
-            review.review
+            injectMarkdown(review.review)
           ),
-          div(cls := "review-posted", "Posted (TODO) a million years ago")
+          div(cls := "review-posted", s"Posted ${Time.unix2Hr(review.created.toEpochMilli)}"),
+          child.maybe <-- Session.userState.signal
+            .map(_.filter(_.id == review.userId))
+            .map(_.map(_ => div(cls := "review-posted", "Your review")))
         )
       )
     )
@@ -189,3 +195,12 @@ object CompanyPage:
         )
       )
     )
+
+  private def injectMarkdown(markdown: String) =
+    DomApi
+      .unsafeParseHtmlStringIntoNodeArray(Markdown.toHtml(markdown))
+      .map {
+        case t: dom.Text         => span(t.data)
+        case e: dom.html.Element => foreignHtmlElement(e)
+        case _                   => emptyNode
+      }
